@@ -27,6 +27,18 @@ public sealed partial class ContentWidgetWindow
         return item;
     }
 
+    private MenuFlyoutItem CreateDesktopOrganizationMenuItem()
+    {
+        var item = new MenuFlyoutItem
+        {
+            Text = App.Current.LocalizationService.T("Tray.OrganizeDesktop"),
+            Icon = new FontIcon { Glyph = "\uE8FD" }
+        };
+        item.Click += (_, _) => DispatcherQueue.TryEnqueue(() =>
+            App.Current.ShowDesktopOrganizationWindow());
+        return item;
+    }
+
     internal async Task ShowWidgetRuleEditorAsync()
     {
         if (RootElement.XamlRoot is null)

@@ -636,6 +636,10 @@ public partial class WidgetViewModel
             return Task.CompletedTask;
         }
 
+        // An Explorer move the app did not perform (drag-out or cut/paste to
+        // the desktop) must not be pulled back by desktop auto-organization.
+        App.Current?.OrganizerService?.SuppressDesktopDestinations(normalizedPaths);
+
         foreach (var path in normalizedPaths)
         {
             RemoveItemByPath(path);

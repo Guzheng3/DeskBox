@@ -397,6 +397,34 @@ public sealed class OrganizerService
         await _settingsService.SaveAsync(notifySubscribers: false);
     }
 
+    /// <summary>
+    /// Suppresses auto-organization for the desktop destination each moved-out
+    /// source path would occupy, so an Explorer move the app did not perform
+    /// (drag-out or cut/paste to the desktop) is not pulled back into the widget.
+    /// Only paths whose same-named entry already exists on the desktop register.
+    /// </summary>
+    public void SuppressDesktopDestinations(IEnumerable<string> sourcePaths)
+    {
+        string desktopPath = _desktopPathProvider();
+        foreach (string sourcePath in sourcePaths.Distinct(StringComparer.OrdinalIgnoreCase))
+        {
+            string fileName = Path.GetFileName(
+                sourcePath.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
+            if (string.IsNullOrWhiteSpace(fileName))
+            {
+                continue;
+            }
+
+            string destination = Path.Combine(desktopPath, fileName);
+            if (!File.Exists(destination) && !Directory.Exists(destination))
+            {
+                continue;
+            }
+
+            _autoOrganizationSuppressions.SuppressPath(destination);
+        }
+    }
+
     private async Task AddHistoryEntryAsync(OrganizationHistoryEntry entry)
     {
         _settingsService.Settings.RecentOrganizationHistory.Insert(0, entry);

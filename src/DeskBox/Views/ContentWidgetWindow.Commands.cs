@@ -357,6 +357,7 @@ public sealed partial class ContentWidgetWindow
                 !string.IsNullOrWhiteSpace(_config.MappedFolderPath))
             {
                 flyout.Items.Add(CreateWidgetRuleMenuItem());
+                flyout.Items.Add(CreateDesktopOrganizationMenuItem());
             }
         }
 

@@ -83,6 +83,32 @@ internal sealed class DesktopAutoOrganizationSuppressionRegistry
         }
     }
 
+    /// <summary>
+    /// Registers a one-shot suppression for a path that already exists on the
+    /// desktop, e.g. after the user dragged or pasted a widget item out to the
+    /// desktop themselves. The fingerprint is captured immediately; paths that
+    /// cannot be fingerprinted (missing or locked) are not registered.
+    /// </summary>
+    public void SuppressPath(string path)
+    {
+        string? normalized = NormalizePath(path);
+        if (normalized is null ||
+            !TryCaptureFingerprint(normalized, out FileFingerprint fingerprint))
+        {
+            return;
+        }
+
+        lock (_gate)
+        {
+            RemoveExpiredEntriesLocked();
+            _entries[normalized] = new SuppressionEntry(
+                Guid.NewGuid().ToString("N"),
+                _utcNow() + _lifetime,
+                fingerprint,
+                IsPending: false);
+        }
+    }
+
     public bool TryConsume(string path)
     {
         string? normalized = NormalizePath(path);

@@ -210,6 +210,47 @@ public sealed class OrganizerServiceTests : IDisposable
             history.Items.Single().DestinationPath));
     }
 
+    [Fact]
+    public void SuppressDesktopDestinations_ExistingDesktopFile_RegistersSuppression()
+    {
+        string widgetFolder = Directory.CreateDirectory(Path.Combine(_tempRoot, "widget")).FullName;
+        string sourcePath = Path.Combine(widgetFolder, "note.txt");
+        string desktopDestination = Path.Combine(_desktopRoot, "note.txt");
+        File.WriteAllText(sourcePath, "content");
+        File.WriteAllText(desktopDestination, "content");
+
+        _organizerService.SuppressDesktopDestinations([sourcePath]);
+
+        Assert.True(_organizerService.AutoOrganizationSuppressions.TryConsume(desktopDestination));
+        Assert.Equal("content", File.ReadAllText(desktopDestination));
+    }
+
+    [Fact]
+    public void SuppressDesktopDestinations_MissingDesktopFile_DoesNotSuppress()
+    {
+        string widgetFolder = Directory.CreateDirectory(Path.Combine(_tempRoot, "widget")).FullName;
+        string sourcePath = Path.Combine(widgetFolder, "note.txt");
+        File.WriteAllText(sourcePath, "content");
+
+        _organizerService.SuppressDesktopDestinations([sourcePath]);
+
+        Assert.False(_organizerService.AutoOrganizationSuppressions.TryConsume(
+            Path.Combine(_desktopRoot, "note.txt")));
+    }
+
+    [Fact]
+    public void SuppressDesktopDestinations_DirectoryDestination_IsSuppressed()
+    {
+        string widgetFolder = Directory.CreateDirectory(Path.Combine(_tempRoot, "widget")).FullName;
+        string sourcePath = Path.Combine(widgetFolder, "bundle");
+        string desktopDestination = Directory.CreateDirectory(
+            Path.Combine(_desktopRoot, "bundle")).FullName;
+
+        _organizerService.SuppressDesktopDestinations([sourcePath]);
+
+        Assert.True(_organizerService.AutoOrganizationSuppressions.TryConsume(desktopDestination));
+    }
+
     private static WidgetConfig CreateWidget(string folderPath, bool followsDefaultStoragePath = true)
     {
         return new WidgetConfig

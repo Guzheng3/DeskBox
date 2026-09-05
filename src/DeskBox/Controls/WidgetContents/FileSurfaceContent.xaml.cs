@@ -1,4 +1,4 @@
-﻿using System.Collections.Specialized;
+using System.Collections.Specialized;
 using DeskBox.Controls;
 using DeskBox.Contracts;
 using DeskBox.Helpers;
@@ -625,6 +625,18 @@ public sealed partial class FileSurfaceContent :
             .ToArray() ?? [];
         if (removedItems.Length > 0)
         {
+            string[] departedCutPaths = removedItems
+                .Select(item => item.Path)
+                .Where(path => _cutClipboardPaths.Contains(path, StringComparer.OrdinalIgnoreCase))
+                .ToArray();
+            if (departedCutPaths.Length > 0)
+            {
+                // The cut item left the widget (e.g. pasted onto the desktop by
+                // Explorer). Register the suppression before the desktop
+                // watcher's settle window ends.
+                App.Current?.OrganizerService?.SuppressDesktopDestinations(departedCutPaths);
+            }
+
             string[] replacementPaths = e.NewItems?
                 .OfType<WidgetItem>()
                 .Select(item => item.Path)

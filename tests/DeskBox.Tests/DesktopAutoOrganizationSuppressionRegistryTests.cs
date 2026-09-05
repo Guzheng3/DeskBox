@@ -59,6 +59,59 @@ public sealed class DesktopAutoOrganizationSuppressionRegistryTests : IDisposabl
         Assert.False(registry.TryConsume(destination));
     }
 
+    [Fact]
+    public void SuppressedExistingPath_IsConsumedOnce()
+    {
+        Directory.CreateDirectory(_root);
+        string destination = Path.Combine(_root, "dragged-out.txt");
+        File.WriteAllText(destination, "content");
+        var registry = new DesktopAutoOrganizationSuppressionRegistry();
+        registry.SuppressPath(destination);
+
+        Assert.True(registry.TryConsume(destination));
+        Assert.False(registry.TryConsume(destination));
+    }
+
+    [Fact]
+    public void SuppressedExistingPath_ConsumeFailsWhenFileReplaced()
+    {
+        Directory.CreateDirectory(_root);
+        string destination = Path.Combine(_root, "dragged-out.txt");
+        File.WriteAllText(destination, "content");
+        var registry = new DesktopAutoOrganizationSuppressionRegistry();
+        registry.SuppressPath(destination);
+        File.AppendAllText(destination, " replacement");
+
+        Assert.False(registry.TryConsume(destination));
+        Assert.False(registry.TryConsume(destination));
+    }
+
+    [Fact]
+    public void SuppressedMissingPath_IsNotRegistered()
+    {
+        Directory.CreateDirectory(_root);
+        var registry = new DesktopAutoOrganizationSuppressionRegistry();
+        registry.SuppressPath(Path.Combine(_root, "missing.txt"));
+
+        Assert.False(registry.TryConsume(Path.Combine(_root, "missing.txt")));
+    }
+
+    [Fact]
+    public void SuppressedPath_ExpiresAfterLifetime()
+    {
+        Directory.CreateDirectory(_root);
+        DateTimeOffset now = DateTimeOffset.UtcNow;
+        string destination = Path.Combine(_root, "dragged-out.txt");
+        File.WriteAllText(destination, "content");
+        var registry = new DesktopAutoOrganizationSuppressionRegistry(
+            () => now,
+            TimeSpan.FromSeconds(5));
+        registry.SuppressPath(destination);
+        now += TimeSpan.FromSeconds(6);
+
+        Assert.False(registry.TryConsume(destination));
+    }
+
     public void Dispose()
     {
         if (Directory.Exists(_root))
