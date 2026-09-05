@@ -431,6 +431,7 @@ public sealed class DesktopOrganizationCoordinator
         }
 
         scale = Math.Max(1, GetDpiForSystem() / 96d);
+        double scaleValue = scale;
         workArea = new DesktopOrganizationRect(
             nativeWorkArea.Left,
             nativeWorkArea.Top,
@@ -441,8 +442,8 @@ public sealed class DesktopOrganizationCoordinator
             .Select(widget => new DesktopOrganizationRect(
                 widget.X,
                 widget.Y,
-                widget.Width * scale,
-                widget.Height * scale))
+                widget.Width * scaleValue,
+                widget.Height * scaleValue))
             .ToList();
         return true;
     }
