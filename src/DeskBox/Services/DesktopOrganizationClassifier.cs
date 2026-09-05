@@ -4,8 +4,14 @@ namespace DeskBox.Services;
 
 public sealed class DesktopOrganizationClassifier
 {
-    private static readonly HashSet<string> ShortcutExtensions =
-        CreateSet(".lnk", ".url", ".appref-ms");
+    private static readonly HashSet<string> ProgramExtensions =
+        CreateSet(".exe", ".msi", ".msix", ".appx", ".appxbundle", ".msixbundle", ".lnk", ".appref-ms");
+
+    private static readonly HashSet<string> ArchiveExtensions =
+        CreateSet(".zip", ".7z", ".rar", ".tar", ".gz", ".bz2", ".xz", ".iso");
+
+    private static readonly HashSet<string> WebpageExtensions =
+        CreateSet(".url", ".html", ".htm", ".mht", ".mhtml", ".website");
 
     private static readonly HashSet<string> ImageExtensions =
         CreateSet(".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp", ".svg", ".heic", ".heif", ".tif", ".tiff", ".raw", ".psd");
@@ -15,9 +21,6 @@ public sealed class DesktopOrganizationClassifier
 
     private static readonly HashSet<string> VideoExtensions =
         CreateSet(".mp4", ".mkv", ".mov", ".avi", ".wmv", ".webm", ".m4v", ".flv");
-
-    private static readonly HashSet<string> PackageExtensions =
-        CreateSet(".zip", ".7z", ".rar", ".tar", ".gz", ".bz2", ".xz", ".iso", ".exe", ".msi", ".msix", ".appx", ".appxbundle", ".msixbundle");
 
     private static readonly Dictionary<string, string> DocumentSubtypeByExtension =
         new(StringComparer.OrdinalIgnoreCase)
@@ -43,9 +46,9 @@ public sealed class DesktopOrganizationClassifier
     {
         string extension = NormalizeExtension(Path.GetExtension(path));
 
-        if (ShortcutExtensions.Contains(extension))
+        if (ProgramExtensions.Contains(extension))
         {
-            return new(DesktopOrganizationCategoryIds.Shortcuts, null, extension);
+            return new(DesktopOrganizationCategoryIds.Programs, null, extension);
         }
 
         if (DocumentSubtypeByExtension.TryGetValue(extension, out string? documentSubtype))
@@ -53,9 +56,14 @@ public sealed class DesktopOrganizationClassifier
             return new(DesktopOrganizationCategoryIds.Documents, documentSubtype, extension);
         }
 
+        if (ArchiveExtensions.Contains(extension))
+        {
+            return new(DesktopOrganizationCategoryIds.Archives, null, extension);
+        }
+
         if (ImageExtensions.Contains(extension))
         {
-            return new(DesktopOrganizationCategoryIds.Images, null, extension);
+            return new(DesktopOrganizationCategoryIds.Media, null, extension);
         }
 
         if (AudioExtensions.Contains(extension))
@@ -68,9 +76,9 @@ public sealed class DesktopOrganizationClassifier
             return new(DesktopOrganizationCategoryIds.Media, DesktopOrganizationSubtypeIds.Video, extension);
         }
 
-        if (PackageExtensions.Contains(extension))
+        if (WebpageExtensions.Contains(extension))
         {
-            return new(DesktopOrganizationCategoryIds.Packages, null, extension);
+            return new(DesktopOrganizationCategoryIds.Webpages, null, extension);
         }
 
         return new(DesktopOrganizationCategoryIds.Other, null, extension);
@@ -79,11 +87,15 @@ public sealed class DesktopOrganizationClassifier
     public static IReadOnlyList<string> GetCategoryExtensions(string categoryId) =>
         categoryId switch
         {
-            DesktopOrganizationCategoryIds.Shortcuts => ShortcutExtensions.OrderBy(value => value).ToArray(),
+            DesktopOrganizationCategoryIds.Programs => ProgramExtensions.OrderBy(value => value).ToArray(),
+            DesktopOrganizationCategoryIds.Archives => ArchiveExtensions.OrderBy(value => value).ToArray(),
             DesktopOrganizationCategoryIds.Documents => DocumentSubtypeByExtension.Keys.OrderBy(value => value).ToArray(),
-            DesktopOrganizationCategoryIds.Images => ImageExtensions.OrderBy(value => value).ToArray(),
-            DesktopOrganizationCategoryIds.Media => AudioExtensions.Concat(VideoExtensions).OrderBy(value => value).ToArray(),
-            DesktopOrganizationCategoryIds.Packages => PackageExtensions.OrderBy(value => value).ToArray(),
+            DesktopOrganizationCategoryIds.Media => ImageExtensions
+                .Concat(AudioExtensions)
+                .Concat(VideoExtensions)
+                .OrderBy(value => value)
+                .ToArray(),
+            DesktopOrganizationCategoryIds.Webpages => WebpageExtensions.OrderBy(value => value).ToArray(),
             _ => []
         };
 

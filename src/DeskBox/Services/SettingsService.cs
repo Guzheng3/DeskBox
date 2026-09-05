@@ -2480,9 +2480,13 @@ settings.FocusClickedWidgetOnRaise = false;
                     ? Guid.NewGuid().ToString("N")
                     : rule.Id.Trim();
                 rule.TargetWidgetId = rule.TargetWidgetId?.Trim() ?? string.Empty;
-                rule.CategoryIds = NormalizeDesktopOrganizationValues(
-                    rule.CategoryIds,
-                    StringComparer.Ordinal);
+                var normalizedCategoryIds = NormalizeDesktopOrganizationCategoryIds(
+                    NormalizeDesktopOrganizationValues(rule.CategoryIds, StringComparer.Ordinal));
+                if (!normalizedCategoryIds.SequenceEqual(rule.CategoryIds, StringComparer.Ordinal))
+                {
+                    changed = true;
+                }
+                rule.CategoryIds = normalizedCategoryIds;
                 rule.SubtypeIds = NormalizeDesktopOrganizationValues(
                     rule.SubtypeIds,
                     StringComparer.Ordinal);
@@ -2571,6 +2575,43 @@ settings.FocusClickedWidgetOnRaise = false;
             .Where(extension => !string.IsNullOrWhiteSpace(extension))
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToList();
+    }
+
+    private static List<string> NormalizeDesktopOrganizationCategoryIds(List<string> categoryIds)
+    {
+        if (categoryIds.Count == 0)
+        {
+            return categoryIds;
+        }
+
+        var currentIds = new HashSet<string>(
+            DesktopOrganizationCategoryIds.DefaultOrder,
+            StringComparer.Ordinal);
+        var mapped = new List<string>();
+        foreach (string categoryId in categoryIds)
+        {
+            if (DesktopOrganizationCategoryIds.LegacyCategoryMap.TryGetValue(
+                    categoryId,
+                    out string[]? replacements))
+            {
+                foreach (string replacement in replacements)
+                {
+                    if (!mapped.Contains(replacement))
+                    {
+                        mapped.Add(replacement);
+                    }
+                }
+
+                continue;
+            }
+
+            if (currentIds.Contains(categoryId) && !mapped.Contains(categoryId))
+            {
+                mapped.Add(categoryId);
+            }
+        }
+
+        return mapped;
     }
 
     public static string NormalizeAttachmentStorageMode(string? storageMode)

@@ -568,10 +568,11 @@ public sealed partial class DesktopOrganizationTaskView
         return item.ExclusionReason == DesktopOrganizationExclusionReason.None
             ? item.CategoryId switch
             {
-                DesktopOrganizationCategoryIds.Images => "\uE91B",
+                DesktopOrganizationCategoryIds.Programs => "\uE719",
+                DesktopOrganizationCategoryIds.Archives => "\uE7B8",
+                DesktopOrganizationCategoryIds.Documents => "\uE8A5",
                 DesktopOrganizationCategoryIds.Media => "\uE714",
-                DesktopOrganizationCategoryIds.Shortcuts => "\uE71B",
-                DesktopOrganizationCategoryIds.Packages => "\uE7B8",
+                DesktopOrganizationCategoryIds.Webpages => "\uE774",
                 _ => "\uE7C3"
             }
             : "\uE7BA";

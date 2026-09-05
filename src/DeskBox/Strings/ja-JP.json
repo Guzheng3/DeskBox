@@ -1,4 +1,4 @@
-﻿{
+{
     "Settings.Performance.Title": "パフォーマンスとリソース",
     "Display.VirtualAdapter.Warning.Title": "仮想ディスプレイを検出しました",
     "Display.VirtualAdapter.Warning.Body": "メインモニターが仮想グラフィックアダプター経由で接続されています。ウィジェットが隅に重なったり、応答しなくなったり、クラッシュする場合は、物理モニターへの切り替えをお試しください。その他の機能には影響ありません。",
@@ -2124,11 +2124,11 @@
     "DesktopOrganization.Retention.TransferFailed": "移動できませんでした",
     "DesktopOrganization.Result.FailedTitle": "デスクトップ整理を完了できませんでした",
     "DesktopOrganization.Error.NoLayoutSpace": "デスクトップ右側に重ならず配置できる十分な領域がありません。",
-    "DesktopOrganization.Category.Shortcuts": "アプリとショートカット",
-    "DesktopOrganization.Category.Documents": "ドキュメント",
-    "DesktopOrganization.Category.Images": "画像",
-    "DesktopOrganization.Category.Media": "メディア",
-    "DesktopOrganization.Category.Packages": "インストーラーと圧縮ファイル",
+    "DesktopOrganization.Category.Programs": "プログラム",
+    "DesktopOrganization.Category.Archives": "アーカイブ",
+    "DesktopOrganization.Category.Documents": "ファイル",
+    "DesktopOrganization.Category.Media": "メディアファイル",
+    "DesktopOrganization.Category.Webpages": "Webページ",
     "DesktopOrganization.Category.Other": "その他",
     "DesktopOrganization.Subtype.Pdf": "PDF",
     "DesktopOrganization.Subtype.Word": "Word 文書",

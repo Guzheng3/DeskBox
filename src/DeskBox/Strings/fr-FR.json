@@ -1,4 +1,4 @@
-﻿{
+{
     "Settings.Performance.Title": "Performances et ressources",
     "Display.VirtualAdapter.Warning.Title": "Écran virtuel détecté",
     "Display.VirtualAdapter.Warning.Body": "Votre écran principal est fourni par une carte graphique virtuelle. Si les widgets s'empilent dans un coin, se figent ou que l'application plante, essayez un écran physique. Le reste fonctionne normalement.",
@@ -2190,11 +2190,11 @@
   "DesktopOrganization.Exclusion.UserChoice": "Non sélectionné pour cette organisation",
   "DesktopOrganization.Exclusion.SlowItem": "Fichiers de plus de 100 Mo",
   "DesktopOrganization.Exclusion.BatchLimit": "Au-delà de cette organisation rapide par lots (200 fichiers soit 100 Mo)",
-  "DesktopOrganization.Category.Shortcuts": "Applications et raccourcis",
-  "DesktopOrganization.Category.Documents": "Documents",
-  "DesktopOrganization.Category.Images": "Images",
+  "DesktopOrganization.Category.Programs": "Programmes",
+  "DesktopOrganization.Category.Archives": "Archives",
+  "DesktopOrganization.Category.Documents": "Fichiers",
   "DesktopOrganization.Category.Media": "Médias",
-  "DesktopOrganization.Category.Packages": "Installateurs et archives",
+  "DesktopOrganization.Category.Webpages": "Pages web",
   "DesktopOrganization.Category.Other": "Autre",
   "DesktopOrganization.Subtype.Pdf": "PDF",
   "DesktopOrganization.Subtype.Word": "Documents Word",

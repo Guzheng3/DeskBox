@@ -1,4 +1,4 @@
-﻿{
+{
     "Settings.Performance.Title": "Desempenho e recursos",
     "Display.VirtualAdapter.Warning.Title": "Tela virtual detectada",
     "Display.VirtualAdapter.Warning.Body": "Seu monitor principal usa um adaptador de vídeo virtual. Se os widgets empilharem num canto, travarem ou o app fechar sozinho, tente uma tela física. Todo o restante continua funcionando.",
@@ -2124,11 +2124,11 @@
     "DesktopOrganization.Retention.TransferFailed": "não foi possível mover",
     "DesktopOrganization.Result.FailedTitle": "A organização não foi concluída",
     "DesktopOrganization.Error.NoLayoutSpace": "Não há espaço suficiente sem sobreposição no lado direito da área de trabalho.",
-    "DesktopOrganization.Category.Shortcuts": "Aplicativos e atalhos",
-    "DesktopOrganization.Category.Documents": "Documentos",
-    "DesktopOrganization.Category.Images": "Imagens",
+    "DesktopOrganization.Category.Programs": "Programas",
+    "DesktopOrganization.Category.Archives": "Compactados",
+    "DesktopOrganization.Category.Documents": "Arquivos",
     "DesktopOrganization.Category.Media": "Mídia",
-    "DesktopOrganization.Category.Packages": "Instaladores e arquivos compactados",
+    "DesktopOrganization.Category.Webpages": "Páginas da web",
     "DesktopOrganization.Category.Other": "Outros",
     "DesktopOrganization.Subtype.Pdf": "PDF",
     "DesktopOrganization.Subtype.Word": "Documentos do Word",

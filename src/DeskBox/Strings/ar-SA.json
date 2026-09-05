@@ -1,4 +1,4 @@
-﻿{
+{
     "Settings.Performance.Title": "الأداء والموارد",
     "Display.VirtualAdapter.Warning.Title": "تم اكتشاف شاشة افتراضية",
     "Display.VirtualAdapter.Warning.Body": "شاشتك الأساسية تعمل عبر محرك رسوميات افتراضي. إذا تكدست الأدوات في زاوية، أو توقفت عن الاستجابة، أو تعطل التطبيق، فجرّب التبديل إلى شاشة فعلية. كل شيء آخر يعمل بشكل طبيعي.",
@@ -2190,11 +2190,11 @@
   "DesktopOrganization.Exclusion.UserChoice": "غير محدد لهذه المرة",
   "DesktopOrganization.Exclusion.SlowItem": "الملفات التي يزيد حجمها عن 100 ميجابايت",
   "DesktopOrganization.Exclusion.BatchLimit": "أبعد من مجموعة التنظيم السريعة هذه (200 ملف أو 100 ميجابايت)",
-  "DesktopOrganization.Category.Shortcuts": "التطبيقات والاختصارات",
-  "DesktopOrganization.Category.Documents": "المستندات",
-  "DesktopOrganization.Category.Images": "الصور",
-  "DesktopOrganization.Category.Media": "وسائل الإعلام",
-  "DesktopOrganization.Category.Packages": "المثبتات والمحفوظات",
+  "DesktopOrganization.Category.Programs": "البرامج",
+  "DesktopOrganization.Category.Archives": "الملفات المضغوطة",
+  "DesktopOrganization.Category.Documents": "الملفات",
+  "DesktopOrganization.Category.Media": "الوسائط",
+  "DesktopOrganization.Category.Webpages": "صفحات الويب",
   "DesktopOrganization.Category.Other": "أخرى",
   "DesktopOrganization.Subtype.Pdf": "قوات الدفاع الشعبي",
   "DesktopOrganization.Subtype.Word": "مستندات Word",

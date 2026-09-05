@@ -1,4 +1,4 @@
-﻿{
+{
     "Settings.Performance.Title": "Производительность и ресурсы",
     "Display.VirtualAdapter.Warning.Title": "Обнаружен виртуальный дисплей",
     "Display.VirtualAdapter.Warning.Body": "Ваш основной монитор работает через виртуальный видеоадаптер. Если виджеты скапливаются в углу, зависают или приложение падает — переключитесь на физический монитор. Всё остальное работает как обычно.",
@@ -2190,11 +2190,11 @@
   "DesktopOrganization.Exclusion.UserChoice": "Не выбрано для этого запуска",
   "DesktopOrganization.Exclusion.SlowItem": "Файлы более 100 МБ",
   "DesktopOrganization.Exclusion.BatchLimit": "Помимо этого пакета быстрой организации (200 файлов или 100 МБ)",
-  "DesktopOrganization.Category.Shortcuts": "Приложения и ярлыки",
-  "DesktopOrganization.Category.Documents": "Документы",
-  "DesktopOrganization.Category.Images": "Изображения",
-  "DesktopOrganization.Category.Media": "СМИ",
-  "DesktopOrganization.Category.Packages": "Инсталляторы и архивы",
+  "DesktopOrganization.Category.Programs": "Программы",
+  "DesktopOrganization.Category.Archives": "Архивы",
+  "DesktopOrganization.Category.Documents": "Файлы",
+  "DesktopOrganization.Category.Media": "Медиа",
+  "DesktopOrganization.Category.Webpages": "Веб-страницы",
   "DesktopOrganization.Category.Other": "Другое",
   "DesktopOrganization.Subtype.Pdf": "PDF",
   "DesktopOrganization.Subtype.Word": "Документы Word",

@@ -1,4 +1,4 @@
-﻿{
+{
     "Settings.Performance.Title": "效能與資源",
     "Display.VirtualAdapter.Warning.Title": "偵測到虛擬顯示器",
     "Display.VirtualAdapter.Warning.Body": "你的主顯示器來自虛擬顯示卡。如果出現格子堆疊在角落、無回應或閃退，請嘗試切換到實體顯示器。其餘功能不受影響。",
@@ -2190,11 +2190,11 @@
   "DesktopOrganization.Exclusion.UserChoice": "本次未選擇",
   "DesktopOrganization.Exclusion.SlowItem": "超過 100 MB 的檔案",
   "DesktopOrganization.Exclusion.BatchLimit": "超出本次快速整理上限（最多 200 個檔案、累計 100 MB）",
-  "DesktopOrganization.Category.Shortcuts": "應用程式與捷徑",
+  "DesktopOrganization.Category.Programs": "程式",
+  "DesktopOrganization.Category.Archives": "壓縮檔",
   "DesktopOrganization.Category.Documents": "檔案",
-  "DesktopOrganization.Category.Images": "圖片",
-  "DesktopOrganization.Category.Media": "媒體",
-  "DesktopOrganization.Category.Packages": "安裝包與壓縮檔案",
+  "DesktopOrganization.Category.Media": "媒體檔案",
+  "DesktopOrganization.Category.Webpages": "網頁",
   "DesktopOrganization.Category.Other": "其他",
   "DesktopOrganization.Subtype.Pdf": "PDF",
   "DesktopOrganization.Subtype.Word": "Word 檔案",

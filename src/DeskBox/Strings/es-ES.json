@@ -1,4 +1,4 @@
-﻿{
+{
     "Settings.Performance.Title": "Rendimiento y recursos",
     "Display.VirtualAdapter.Warning.Title": "Pantalla virtual detectada",
     "Display.VirtualAdapter.Warning.Body": "Tu monitor principal usa un adaptador gráfico virtual. Si los widgets se apilan en una esquina, se congelan o la app se cierra, prueba con una pantalla física. Todo lo demás sigue funcionando.",
@@ -2190,11 +2190,11 @@
   "DesktopOrganization.Exclusion.UserChoice": "No seleccionado para esta ejecución",
   "DesktopOrganization.Exclusion.SlowItem": "Archivos de más de 100 MB",
   "DesktopOrganization.Exclusion.BatchLimit": "Más allá de este lote de organización rápida (200 archivos o 100 MB)",
-  "DesktopOrganization.Category.Shortcuts": "Aplicaciones y atajos",
-  "DesktopOrganization.Category.Documents": "Documentos",
-  "DesktopOrganization.Category.Images": "Imágenes",
-  "DesktopOrganization.Category.Media": "Medios",
-  "DesktopOrganization.Category.Packages": "Instaladores y archivos",
+  "DesktopOrganization.Category.Programs": "Programas",
+  "DesktopOrganization.Category.Archives": "Comprimidos",
+  "DesktopOrganization.Category.Documents": "Archivos",
+  "DesktopOrganization.Category.Media": "Multimedia",
+  "DesktopOrganization.Category.Webpages": "Páginas web",
   "DesktopOrganization.Category.Other": "Otro",
   "DesktopOrganization.Subtype.Pdf": "PDF",
   "DesktopOrganization.Subtype.Word": "documentos de palabra",

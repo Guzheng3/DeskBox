@@ -1,4 +1,4 @@
-﻿{
+{
     "Settings.Performance.Title": "কর্মক্ষমতা ও রিসোর্স",
     "Display.VirtualAdapter.Warning.Title": "ভার্চুয়াল ডিসপ্লে শনাক্ত হয়েছে",
     "Display.VirtualAdapter.Warning.Body": "আপনার প্রধান মনিটর একটি ভার্চুয়াল গ্রাফিক্স অ্যাডাপ্টার থেকে আসছে। উইজেটগুলো কোণায় জমা হলে, আটকে গেলে বা অ্যাপ বন্ধ হলে ফিজিক্যাল মনিটরে স্যুইচ করুন। বাকি সব স্বাভাবিক চলবে।",
@@ -2190,11 +2190,11 @@
   "DesktopOrganization.Exclusion.UserChoice": "এইবার নির্বাচিত নয়",
   "DesktopOrganization.Exclusion.SlowItem": "100 MB এর বেশি ফাইল",
   "DesktopOrganization.Exclusion.BatchLimit": "এই দ্রুত সংগঠন ব্যাচের বাইরে (200 ফাইল বা 100 এমবি)",
-  "DesktopOrganization.Category.Shortcuts": "অ্যাপস এবং শর্টকাট",
-  "DesktopOrganization.Category.Documents": "নথিপত্র",
-  "DesktopOrganization.Category.Images": "ছবি",
+  "DesktopOrganization.Category.Programs": "প্রোগ্রাম",
+  "DesktopOrganization.Category.Archives": "আর্কাইভ",
+  "DesktopOrganization.Category.Documents": "ফাইল",
   "DesktopOrganization.Category.Media": "মিডিয়া",
-  "DesktopOrganization.Category.Packages": "ইনস্টলার এবং সংরক্ষণাগার",
+  "DesktopOrganization.Category.Webpages": "ওয়েবপেজ",
   "DesktopOrganization.Category.Other": "অন্যান্য",
   "DesktopOrganization.Subtype.Pdf": "PDF",
   "DesktopOrganization.Subtype.Word": "শব্দ নথি",

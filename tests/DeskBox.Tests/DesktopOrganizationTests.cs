@@ -10,11 +10,14 @@ public sealed class DesktopOrganizationTests : IDisposable
 
     [Theory]
     [InlineData("report.pdf", DesktopOrganizationCategoryIds.Documents, DesktopOrganizationSubtypeIds.Pdf)]
-    [InlineData("photo.webp", DesktopOrganizationCategoryIds.Images, null)]
+    [InlineData("photo.webp", DesktopOrganizationCategoryIds.Media, null)]
     [InlineData("movie.mp4", DesktopOrganizationCategoryIds.Media, DesktopOrganizationSubtypeIds.Video)]
     [InlineData("music.flac", DesktopOrganizationCategoryIds.Media, DesktopOrganizationSubtypeIds.Audio)]
-    [InlineData("app.lnk", DesktopOrganizationCategoryIds.Shortcuts, null)]
-    [InlineData("setup.msix", DesktopOrganizationCategoryIds.Packages, null)]
+    [InlineData("app.lnk", DesktopOrganizationCategoryIds.Programs, null)]
+    [InlineData("setup.msix", DesktopOrganizationCategoryIds.Programs, null)]
+    [InlineData("bundle.zip", DesktopOrganizationCategoryIds.Archives, null)]
+    [InlineData("saved page.html", DesktopOrganizationCategoryIds.Webpages, null)]
+    [InlineData(" bookmark.url", DesktopOrganizationCategoryIds.Webpages, null)]
     [InlineData("unknown.xyz", DesktopOrganizationCategoryIds.Other, null)]
     public void Classifier_UsesStableTypeIds(
         string fileName,
@@ -425,10 +428,10 @@ public sealed class DesktopOrganizationTests : IDisposable
         };
         foreach (string category in new[]
                  {
-                     DesktopOrganizationCategoryIds.Shortcuts,
-                     DesktopOrganizationCategoryIds.Images,
+                     DesktopOrganizationCategoryIds.Programs,
+                     DesktopOrganizationCategoryIds.Archives,
                      DesktopOrganizationCategoryIds.Media,
-                     DesktopOrganizationCategoryIds.Packages,
+                     DesktopOrganizationCategoryIds.Webpages,
                      DesktopOrganizationCategoryIds.Other
                  })
         {
@@ -741,7 +744,7 @@ public sealed class DesktopOrganizationTests : IDisposable
                     Items =
                     [
                         Snapshot("report.pdf", DesktopOrganizationCategoryIds.Documents, DesktopOrganizationSubtypeIds.Pdf, documentPath, documentInfo.Length, documentInfo.LastWriteTimeUtc),
-                        Snapshot("photo.webp", DesktopOrganizationCategoryIds.Images, null, imagePath, imageInfo.Length, imageInfo.LastWriteTimeUtc)
+                        Snapshot("photo.webp", DesktopOrganizationCategoryIds.Media, null, imagePath, imageInfo.Length, imageInfo.LastWriteTimeUtc)
                     ]
                 }
             ]
@@ -753,7 +756,7 @@ public sealed class DesktopOrganizationTests : IDisposable
 
         DesktopOrganizationRule rule = Assert.Single(settings.Settings.DesktopOrganizationRules);
         Assert.Equal(
-            [DesktopOrganizationCategoryIds.Documents, DesktopOrganizationCategoryIds.Images],
+            [DesktopOrganizationCategoryIds.Documents, DesktopOrganizationCategoryIds.Media],
             rule.CategoryIds);
     }
 

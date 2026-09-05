@@ -1,4 +1,4 @@
-﻿{
+{
     "Settings.Performance.Title": "प्रदर्शन और संसाधन",
     "Display.VirtualAdapter.Warning.Title": "वर्चुअल डिस्प्ले का पता चला",
     "Display.VirtualAdapter.Warning.Body": "आपका मुख्य मॉनिटर वर्चुअल ग्राफ़िक्स एडाप्टर से जुड़ा है। यदि विजेट कोने में ढेर हों, जम जाएँ या ऐप बंद हो जाए, तो भौतिक मॉनिटर पर स्विच करें। बाकी सब सामान्य चलता रहेगा।",
@@ -2190,11 +2190,11 @@
   "DesktopOrganization.Exclusion.UserChoice": "इस बार चयनित नहीं",
   "DesktopOrganization.Exclusion.SlowItem": "100 एमबी से अधिक की फ़ाइलें",
   "DesktopOrganization.Exclusion.BatchLimit": "इस त्वरित संगठन बैच से परे (200 फ़ाइलें या 100 एमबी)",
-  "DesktopOrganization.Category.Shortcuts": "ऐप्स और शॉर्टकट",
-  "DesktopOrganization.Category.Documents": "दस्तावेज़",
-  "DesktopOrganization.Category.Images": "छवियाँ",
+  "DesktopOrganization.Category.Programs": "प्रोग्राम",
+  "DesktopOrganization.Category.Archives": "आर्काइव",
+  "DesktopOrganization.Category.Documents": "फ़ाइलें",
   "DesktopOrganization.Category.Media": "मीडिया",
-  "DesktopOrganization.Category.Packages": "इंस्टॉलर और पुरालेख",
+  "DesktopOrganization.Category.Webpages": "वेबपेज",
   "DesktopOrganization.Category.Other": "अन्य",
   "DesktopOrganization.Subtype.Pdf": "पीडीएफ",
   "DesktopOrganization.Subtype.Word": "शब्द दस्तावेज़",

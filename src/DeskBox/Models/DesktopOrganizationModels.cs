@@ -2,22 +2,34 @@ namespace DeskBox.Models;
 
 public static class DesktopOrganizationCategoryIds
 {
-    public const string Shortcuts = "Shortcuts";
+    public const string Programs = "Programs";
+    public const string Archives = "Archives";
     public const string Documents = "Documents";
-    public const string Images = "Images";
     public const string Media = "Media";
-    public const string Packages = "Packages";
+    public const string Webpages = "Webpages";
     public const string Other = "Other";
 
     public static readonly IReadOnlyList<string> DefaultOrder =
     [
-        Shortcuts,
+        Programs,
+        Archives,
         Documents,
-        Images,
         Media,
-        Packages,
+        Webpages,
         Other
     ];
+
+    /// <summary>
+    /// Rules persisted before the six-category model may still reference the
+    /// removed ids; each legacy id expands to its replacements on load.
+    /// </summary>
+    public static readonly IReadOnlyDictionary<string, string[]> LegacyCategoryMap =
+        new Dictionary<string, string[]>(StringComparer.Ordinal)
+        {
+            ["Shortcuts"] = [Programs],
+            ["Images"] = [Media],
+            ["Packages"] = [Programs, Archives]
+        };
 }
 
 public static class DesktopOrganizationSubtypeIds
