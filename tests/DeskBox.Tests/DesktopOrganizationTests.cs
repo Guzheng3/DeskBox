@@ -469,6 +469,177 @@ public sealed class DesktopOrganizationTests : IDisposable
     }
 
     [Fact]
+    public void Planner_GroupModeKeepsProgramsAndMakesOneMemberPerCategory()
+    {
+        var items = new List<DesktopOrganizationFileSnapshot>
+        {
+            Snapshot("app.lnk", DesktopOrganizationCategoryIds.Programs, null),
+            Snapshot("bundle.zip", DesktopOrganizationCategoryIds.Archives, null),
+            Snapshot("photo.webp", DesktopOrganizationCategoryIds.Media, DesktopOrganizationSubtypeIds.Image),
+            Snapshot("movie.mp4", DesktopOrganizationCategoryIds.Media, DesktopOrganizationSubtypeIds.Video),
+            Snapshot("music.flac", DesktopOrganizationCategoryIds.Media, DesktopOrganizationSubtypeIds.Audio),
+            Snapshot("report.pdf", DesktopOrganizationCategoryIds.Documents, DesktopOrganizationSubtypeIds.Pdf),
+            Snapshot("saved page.html", DesktopOrganizationCategoryIds.Webpages, null),
+            Snapshot("unknown.xyz", DesktopOrganizationCategoryIds.Other, null)
+        };
+        var scan = new DesktopOrganizationScanResult
+        {
+            DesktopPath = _root,
+            Items = items
+        };
+        var planner = new DesktopOrganizationPlanner(new DesktopOrganizationRuleResolver());
+
+        DesktopOrganizationPlan plan = planner.CreateGroupPlan(
+            scan,
+            Path.Combine(_root, "storage"),
+            [],
+            [],
+            "整理桌面",
+            categoryId => $"[{categoryId}]");
+
+        Assert.True(plan.CreateAsGroup);
+        Assert.Equal("整理桌面", plan.GroupName);
+        Assert.Equal(7, plan.EligibleItemCount);
+        Assert.DoesNotContain(plan.Targets, target =>
+            target.CategoryId == DesktopOrganizationCategoryIds.Programs);
+        Assert.DoesNotContain(plan.Targets.SelectMany(target => target.Items), item =>
+            item.Name == "app.lnk");
+        DesktopOrganizationTargetPlan media = Assert.Single(plan.Targets, target =>
+            target.CategoryId == DesktopOrganizationCategoryIds.Media);
+        Assert.Equal(
+            ["photo.webp", "movie.mp4", "music.flac"],
+            media.Items.Select(item => item.Name).ToList());
+        Assert.All(plan.Targets.Where(target => target.CreatesWidget), target =>
+        {
+            Assert.StartsWith(
+                Path.Combine(Path.GetFullPath(Path.Combine(_root, "storage")), "整理桌面"),
+                Path.GetFullPath(target.TargetDirectoryPath),
+                StringComparison.OrdinalIgnoreCase);
+            Assert.Equal($"[{target.CategoryId}]", target.SuggestedDisplayName);
+        });
+        Assert.Equal(5, plan.Targets.Count(target => target.CreatesWidget));
+    }
+
+    [Fact]
+    public void Planner_GroupModeRoutesRuleMatchesToExistingWidget()
+    {
+        Directory.CreateDirectory(_root);
+        var existing = CreateWidget("Inbox", Path.Combine(_root, "inbox"));
+        var rule = new DesktopOrganizationRule
+        {
+            TargetWidgetId = existing.Id,
+            CategoryIds = [DesktopOrganizationCategoryIds.Documents]
+        };
+        var scan = new DesktopOrganizationScanResult
+        {
+            DesktopPath = _root,
+            Items =
+            [
+                Snapshot("one.pdf", DesktopOrganizationCategoryIds.Documents, DesktopOrganizationSubtypeIds.Pdf),
+                Snapshot("two.pdf", DesktopOrganizationCategoryIds.Documents, DesktopOrganizationSubtypeIds.Pdf),
+                Snapshot("bundle.zip", DesktopOrganizationCategoryIds.Archives, null)
+            ]
+        };
+        var planner = new DesktopOrganizationPlanner(new DesktopOrganizationRuleResolver());
+
+        DesktopOrganizationPlan plan = planner.CreateGroupPlan(
+            scan,
+            Path.Combine(_root, "storage"),
+            [existing],
+            [rule],
+            "整理桌面");
+
+        DesktopOrganizationTargetPlan routed = Assert.Single(plan.Targets, target =>
+            target.TargetWidgetId == existing.Id);
+        Assert.False(routed.CreatesWidget);
+        Assert.Equal(2, routed.Items.Count);
+        DesktopOrganizationTargetPlan archives = Assert.Single(plan.Targets, target =>
+            target.CategoryId == DesktopOrganizationCategoryIds.Archives);
+        Assert.True(archives.CreatesWidget);
+        Assert.True(plan.CreateAsGroup);
+    }
+
+    [Fact]
+    public async Task Transaction_GroupModeCreatesTabbedGroupAndSupportsUndo()
+    {
+        string desktop = Directory.CreateDirectory(Path.Combine(_root, "group-desktop")).FullName;
+        string storage = Directory.CreateDirectory(Path.Combine(_root, "group-storage")).FullName;
+        string pdfPath = Path.Combine(desktop, "report.pdf");
+        string zipPath = Path.Combine(desktop, "bundle.zip");
+        string imagePath = Path.Combine(desktop, "photo.webp");
+        File.WriteAllText(pdfPath, "pdf");
+        File.WriteAllText(zipPath, "zip");
+        File.WriteAllText(imagePath, "image");
+        var scanner = new DesktopOrganizationScanner(
+            new DesktopOrganizationClassifier(),
+            () => desktop,
+            () => string.Empty);
+        DesktopOrganizationScanResult scan = await scanner.ScanAsync();
+        DesktopOrganizationPlan plan = new DesktopOrganizationPlanner(
+            new DesktopOrganizationRuleResolver()).CreateGroupPlan(
+            scan,
+            storage,
+            [],
+            [],
+            "整理桌面");
+        var settings = new SettingsService(Path.Combine(_root, "group-settings"));
+        var transaction = new DesktopOrganizationTransaction(settings, new FileService());
+
+        DesktopOrganizationExecutionResult result = await transaction.ExecuteAsync(plan);
+
+        Assert.Equal(3, result.CreatedWidgets.Count);
+        WidgetGroupConfig group = Assert.Single(settings.Settings.WidgetGroups);
+        Assert.Equal("整理桌面", group.Name);
+        Assert.Equal(WidgetGroupNavigationStyles.Tabs, group.NavigationStyle);
+        Assert.Equal(
+            result.CreatedWidgets.Select(widget => widget.Id),
+            group.MemberIds);
+        Assert.Equal(result.CreatedWidgets[0].Id, group.ActiveMemberId);
+        Assert.All(result.History.Items, item => Assert.True(File.Exists(item.DestinationPath)));
+        Assert.False(File.Exists(pdfPath));
+        Assert.False(File.Exists(zipPath));
+        Assert.False(File.Exists(imagePath));
+
+        await new OrganizerService(settings, new FileService(), () => desktop)
+            .UndoAsync(result.History.Id);
+
+        Assert.True(File.Exists(pdfPath));
+        Assert.True(File.Exists(zipPath));
+        Assert.True(File.Exists(imagePath));
+    }
+
+    [Fact]
+    public async Task Transaction_GroupModeSkipsGroupWhenOnlyOneMemberIsCreated()
+    {
+        string desktop = Directory.CreateDirectory(
+            Path.Combine(_root, "single-desktop")).FullName;
+        string storage = Directory.CreateDirectory(
+            Path.Combine(_root, "single-storage")).FullName;
+        File.WriteAllText(Path.Combine(desktop, "one.pdf"), "one");
+        File.WriteAllText(Path.Combine(desktop, "two.pdf"), "two");
+        var scanner = new DesktopOrganizationScanner(
+            new DesktopOrganizationClassifier(),
+            () => desktop,
+            () => string.Empty);
+        DesktopOrganizationScanResult scan = await scanner.ScanAsync();
+        DesktopOrganizationPlan plan = new DesktopOrganizationPlanner(
+            new DesktopOrganizationRuleResolver()).CreateGroupPlan(
+            scan,
+            storage,
+            [],
+            [],
+            "整理桌面");
+        var settings = new SettingsService(Path.Combine(_root, "single-settings"));
+
+        await new DesktopOrganizationTransaction(settings, new FileService())
+            .ExecuteAsync(plan);
+
+        Assert.True(plan.CreateAsGroup);
+        Assert.Empty(settings.Settings.WidgetGroups);
+        Assert.Single(settings.Settings.Widgets);
+    }
+
+    [Fact]
     public void PlacementPlanner_StartsAtTopRightAndAvoidsOccupiedBounds()
     {
         var plan = new DesktopOrganizationPlan
@@ -844,6 +1015,64 @@ public sealed class DesktopOrganizationTests : IDisposable
         Assert.DoesNotContain(settings.Settings.RecentOrganizationHistory, entry => entry.Id == "transaction");
         Assert.False(store.HasPendingJournal);
 
+    }
+
+    [Fact]
+    public async Task Recovery_GroupModeAlsoRemovesTheCreatedGroup()
+    {
+        string desktop = Directory.CreateDirectory(
+            Path.Combine(_root, "group-recovery-desktop")).FullName;
+        string target = Directory.CreateDirectory(
+            Path.Combine(_root, "group-recovery-target")).FullName;
+        string sourcePath = Path.Combine(desktop, "bundle.zip");
+        string destinationPath = Path.Combine(target, "bundle.zip");
+        File.WriteAllText(destinationPath, "content");
+        var settings = new SettingsService(Path.Combine(_root, "group-recovery-settings"));
+        WidgetConfig first = CreateWidget("Archives", target);
+        first.Id = "group-member-one";
+        WidgetConfig second = CreateWidget("Other", target);
+        second.Id = "group-member-two";
+        settings.Settings.Widgets.Add(first);
+        settings.Settings.Widgets.Add(second);
+        settings.Settings.WidgetGroups.Add(new WidgetGroupConfig
+        {
+            Id = "created-group",
+            SurfaceId = "surface",
+            Name = "整理桌面",
+            MemberIds = [first.Id, second.Id],
+            ActiveMemberId = first.Id,
+            NavigationStyle = WidgetGroupNavigationStyles.Tabs
+        });
+        var store = new DesktopOrganizationRecoveryStore(
+            Path.Combine(_root, "group-recovery.json"));
+        await store.SaveAsync(new DesktopOrganizationRecoveryJournal
+        {
+            TransactionId = "group-transaction",
+            CreatedWidgetIds = [first.Id, second.Id],
+            CreatedGroupId = "created-group",
+            Items =
+            [
+                new DesktopOrganizationRecoveryItem
+                {
+                    SourcePath = sourcePath,
+                    DestinationPath = destinationPath,
+                    TargetWidgetId = first.Id,
+                    Completed = false
+                }
+            ]
+        });
+
+        int restored = await new DesktopOrganizationTransaction(
+            settings,
+            new FileService(),
+            store).RecoverPendingAsync();
+
+        Assert.Equal(1, restored);
+        Assert.True(File.Exists(sourcePath));
+        Assert.DoesNotContain(settings.Settings.WidgetGroups, group => group.Id == "created-group");
+        Assert.DoesNotContain(settings.Settings.Widgets, widget => widget.Id == first.Id);
+        Assert.DoesNotContain(settings.Settings.Widgets, widget => widget.Id == second.Id);
+        Assert.False(store.HasPendingJournal);
     }
 
     private DesktopOrganizationFileSnapshot Snapshot(

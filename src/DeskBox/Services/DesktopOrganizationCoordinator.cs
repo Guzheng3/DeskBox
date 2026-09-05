@@ -51,6 +51,48 @@ public sealed class DesktopOrganizationCoordinator
     }
 
     /// <summary>
+    /// Builds the one-click group plan: unrouted desktop items become members
+    /// of a single tabbed widget group. Programs stay on the desktop.
+    /// </summary>
+    public async Task<DesktopOrganizationPlan> BuildGroupPlanAsync(
+        bool includeSlowItems = false,
+        CancellationToken cancellationToken = default)
+    {
+        DesktopOrganizationScanResult scan =
+            await _scanner.ScanAsync(includeSlowItems, cancellationToken);
+        string root = SettingsService.NormalizeManagedStorageRootPath(
+            _settingsService.Settings.DefaultManagedStorageRootPath);
+        DesktopOrganizationPlan plan = _planner.CreateGroupPlan(
+            scan,
+            root,
+            _settingsService.Settings.Widgets,
+            _settingsService.Settings.DesktopOrganizationRules,
+            _localizationService.T("DesktopOrganization.Group.DefaultName"),
+            ResolveCategoryName);
+
+        AssignGroupBounds(plan);
+        return plan;
+    }
+
+    /// <summary>
+    /// One-click shell-menu entry: scans the desktop and organizes unrouted
+    /// non-program items into a single tabbed group. Returns null when there
+    /// was nothing to organize.
+    /// </summary>
+    public async Task<DesktopOrganizationExecutionResult?> QuickOrganizeAsync(
+        CancellationToken cancellationToken = default)
+    {
+        DesktopOrganizationPlan plan = await BuildGroupPlanAsync(
+            cancellationToken: cancellationToken);
+        if (plan.Targets.Count == 0 || plan.EligibleItemCount == 0)
+        {
+            return null;
+        }
+
+        return await ExecuteAsync(plan, cancellationToken);
+    }
+
+    /// <summary>
     /// Compiles the user's preview selections into an immutable execution
     /// plan. The scan plan is never mutated, so changing a combo box cannot
     /// leak into a later refresh or into another execution attempt.
@@ -218,7 +260,13 @@ public sealed class DesktopOrganizationCoordinator
         var shownWidgetIds = new List<string>();
         try
         {
-            foreach (WidgetConfig widget in result.CreatedWidgets)
+            // Group members share one window: revealing the first member makes
+            // the whole group visible, and revealing every member in turn would
+            // visibly cycle the active tab.
+            IEnumerable<WidgetConfig> widgetsToReveal = plan.CreateAsGroup
+                ? result.CreatedWidgets.Take(1)
+                : result.CreatedWidgets;
+            foreach (WidgetConfig widget in widgetsToReveal)
             {
                 await _widgetManager.ShowWidgetAsync(widget.Id, reveal: true, autoRestoreOnReveal: false);
                 shownWidgetIds.Add(widget.Id);
@@ -245,6 +293,10 @@ public sealed class DesktopOrganizationCoordinator
             _settingsService.Settings.Widgets.RemoveAll(widget =>
                 result.CreatedWidgets.Any(created =>
                     string.Equals(created.Id, widget.Id, StringComparison.Ordinal)));
+            _settingsService.Settings.WidgetGroups.RemoveAll(group =>
+                group.MemberIds.Any(memberId =>
+                    result.CreatedWidgets.Any(created =>
+                        string.Equals(created.Id, memberId, StringComparison.Ordinal))));
             await _settingsService.SaveAsync(notifySubscribers: false);
             throw;
         }
@@ -302,26 +354,10 @@ public sealed class DesktopOrganizationCoordinator
             return;
         }
 
-        NativeRect nativeWorkArea = default;
-        if (!SystemParametersInfo(SpiGetWorkArea, 0, ref nativeWorkArea, 0))
+        if (!TryGetWorkAreaLayout(out DesktopOrganizationRect workArea, out List<DesktopOrganizationRect> occupied, out double scale))
         {
             return;
         }
-
-        double scale = Math.Max(1, GetDpiForSystem() / 96d);
-        var workArea = new DesktopOrganizationRect(
-            nativeWorkArea.Left,
-            nativeWorkArea.Top,
-            nativeWorkArea.Right - nativeWorkArea.Left,
-            nativeWorkArea.Bottom - nativeWorkArea.Top);
-        var occupied = _settingsService.Settings.Widgets
-            .Where(widget => widget.IsVisible && !widget.IsDisabled)
-            .Select(widget => new DesktopOrganizationRect(
-                widget.X,
-                widget.Y,
-                widget.Width * scale,
-                widget.Height * scale))
-            .ToList();
 
         if (!_placementPlanner.TryAssignBounds(
                 plan,
@@ -335,6 +371,80 @@ public sealed class DesktopOrganizationCoordinator
             throw new InvalidOperationException(
                 _localizationService.T("DesktopOrganization.Error.NoLayoutSpace"));
         }
+    }
+
+    /// <summary>
+    /// Group plans reserve a single slot: members share one window, so every
+    /// created member receives the same planned bounds.
+    /// </summary>
+    private void AssignGroupBounds(DesktopOrganizationPlan plan)
+    {
+        if (plan.NewWidgetCount == 0)
+        {
+            return;
+        }
+
+        if (!TryGetWorkAreaLayout(out DesktopOrganizationRect workArea, out List<DesktopOrganizationRect> occupied, out double scale))
+        {
+            return;
+        }
+
+        var firstCreated = plan.Targets.First(target => target.CreatesWidget);
+        var proxyPlan = new DesktopOrganizationPlan
+        {
+            DesktopPath = plan.DesktopPath,
+            StorageRootPath = plan.StorageRootPath,
+            Targets = [firstCreated]
+        };
+        if (!_placementPlanner.TryAssignBounds(
+                proxyPlan,
+                workArea,
+                occupied,
+                _settingsService.Settings.DefaultWidgetWidth * scale,
+                _settingsService.Settings.DefaultWidgetHeight * scale,
+                DesktopOrganizationPlacementPlanner.DefaultEdgeMargin * scale,
+                DesktopOrganizationPlacementPlanner.DefaultGap * scale))
+        {
+            throw new InvalidOperationException(
+                _localizationService.T("DesktopOrganization.Error.NoLayoutSpace"));
+        }
+
+        DesktopOrganizationRect? bounds = firstCreated.PlannedBounds;
+        foreach (DesktopOrganizationTargetPlan target in plan.Targets.Where(target => target.CreatesWidget))
+        {
+            target.PlannedBounds = bounds;
+        }
+    }
+
+    private bool TryGetWorkAreaLayout(
+        out DesktopOrganizationRect workArea,
+        out List<DesktopOrganizationRect> occupied,
+        out double scale)
+    {
+        workArea = default;
+        occupied = [];
+        scale = 1;
+        NativeRect nativeWorkArea = default;
+        if (!SystemParametersInfo(SpiGetWorkArea, 0, ref nativeWorkArea, 0))
+        {
+            return false;
+        }
+
+        scale = Math.Max(1, GetDpiForSystem() / 96d);
+        workArea = new DesktopOrganizationRect(
+            nativeWorkArea.Left,
+            nativeWorkArea.Top,
+            nativeWorkArea.Right - nativeWorkArea.Left,
+            nativeWorkArea.Bottom - nativeWorkArea.Top);
+        occupied = _settingsService.Settings.Widgets
+            .Where(widget => widget.IsVisible && !widget.IsDisabled)
+            .Select(widget => new DesktopOrganizationRect(
+                widget.X,
+                widget.Y,
+                widget.Width * scale,
+                widget.Height * scale))
+            .ToList();
+        return true;
     }
 
     private static void TryDeleteEmptyDirectory(string path)

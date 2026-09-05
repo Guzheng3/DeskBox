@@ -2335,6 +2335,73 @@ public partial class App : Application
             NotificationIcon.Warning);
     }
 
+    /// <summary>
+    /// Shell context-menu "organize desktop": organizes unrouted desktop items
+    /// into a single tabbed widget group and reports the outcome via notification.
+    /// </summary>
+    public async Task RunQuickDesktopOrganizationAsync()
+    {
+        if (WidgetManager is null || LocalizationService is null)
+        {
+            return;
+        }
+
+        try
+        {
+            var coordinator = new DesktopOrganizationCoordinator(
+                SettingsService,
+                FileService,
+                WidgetManager,
+                OrganizerService,
+                LocalizationService);
+            DesktopOrganizationExecutionResult? result = await coordinator.QuickOrganizeAsync();
+            if (result is null)
+            {
+                ShowQuickOrganizationNotification(
+                    LocalizationService.T("DesktopOrganization.QuickOrganize.NothingToOrganize"));
+                return;
+            }
+
+            ShowQuickOrganizationNotification(
+                LocalizationService.Format(
+                    "DesktopOrganization.QuickOrganize.Completed",
+                    result.History.Items.Count));
+        }
+        catch (Exception ex)
+        {
+            Log($"[DesktopOrganization] Quick organize failed: {ex}");
+            ShowQuickOrganizationNotification(
+                LocalizationService.T("DesktopOrganization.QuickOrganize.Failed"));
+        }
+    }
+
+    private void ShowQuickOrganizationNotification(string message)
+    {
+        string title = LocalizationService.T("DesktopOrganization.Group.DefaultName");
+        if (_nativeNotificationService?.TryShow(title, message) == true || _trayIcon is null)
+        {
+            return;
+        }
+
+        try
+        {
+            _trayIcon.ShowNotification(
+                title,
+                message,
+                NotificationIcon.Info,
+                customIconHandle: null,
+                largeIcon: false,
+                sound: false,
+                respectQuietTime: true,
+                realtime: false,
+                timeout: TimeSpan.FromSeconds(6));
+        }
+        catch (Exception ex)
+        {
+            Log($"[DesktopOrganization] Quick organize notification failed: {ex.Message}");
+        }
+    }
+
     private void ShowSettingsNotification(
         string titleKey,
         string bodyKey,

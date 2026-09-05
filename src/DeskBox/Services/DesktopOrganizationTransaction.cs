@@ -40,13 +40,19 @@ public sealed class DesktopOrganizationTransaction
 
             var settings = _settingsService.Settings;
             var originalWidgets = settings.Widgets.ToList();
+            var originalGroups = settings.WidgetGroups.ToList();
             var originalRules = settings.DesktopOrganizationRules.ToList();
             var originalHistory = settings.RecentOrganizationHistory.ToList();
             var createdDirectories = new List<string>();
             var completedMoves = new List<FileService.FileTransferResult>();
             var retainedItems = new List<DesktopOrganizationRetainedItem>();
             var createdWidgets = CreateCandidateWidgets(plan, settings);
+            WidgetGroupConfig? createdGroup = CreateCandidateGroup(plan, createdWidgets, settings);
             var journal = BuildJournal(plan);
+            if (createdGroup is not null)
+            {
+                journal.CreatedGroupId = createdGroup.Id;
+            }
 
             try
             {
@@ -181,6 +187,7 @@ public sealed class DesktopOrganizationTransaction
             catch
             {
                 settings.Widgets = originalWidgets;
+                settings.WidgetGroups = originalGroups;
                 settings.DesktopOrganizationRules = originalRules;
                 settings.RecentOrganizationHistory = originalHistory;
                 bool rolledBack = await RollBackMovesAsync(completedMoves);
@@ -223,13 +230,18 @@ public sealed class DesktopOrganizationTransaction
             restored++;
         }
 
-        if (journal.CreatedWidgetIds.Count > 0)
+        if (journal.CreatedWidgetIds.Count > 0 || journal.CreatedGroupId.Length > 0)
         {
             var createdIds = journal.CreatedWidgetIds.ToHashSet(StringComparer.Ordinal);
             _settingsService.Settings.Widgets.RemoveAll(widget =>
                 createdIds.Contains(widget.Id));
             _settingsService.Settings.DesktopOrganizationRules.RemoveAll(rule =>
                 createdIds.Contains(rule.TargetWidgetId));
+            if (journal.CreatedGroupId.Length > 0)
+            {
+                _settingsService.Settings.WidgetGroups.RemoveAll(group =>
+                    string.Equals(group.Id, journal.CreatedGroupId, StringComparison.Ordinal));
+            }
             _settingsService.Settings.RecentOrganizationHistory.RemoveAll(entry =>
                 string.Equals(entry.Id, journal.TransactionId, StringComparison.Ordinal));
             await _settingsService.SaveAsync(notifySubscribers: false);
@@ -374,6 +386,29 @@ public sealed class DesktopOrganizationTransaction
         return created;
     }
 
+    private static WidgetGroupConfig? CreateCandidateGroup(
+        DesktopOrganizationPlan plan,
+        IReadOnlyList<WidgetConfig> createdWidgets,
+        AppSettings settings)
+    {
+        if (!plan.CreateAsGroup || createdWidgets.Count < 2)
+        {
+            return null;
+        }
+
+        var group = new WidgetGroupConfig
+        {
+            Id = Guid.NewGuid().ToString(),
+            SurfaceId = Guid.NewGuid().ToString("N"),
+            Name = plan.GroupName,
+            MemberIds = createdWidgets.Select(widget => widget.Id).ToList(),
+            ActiveMemberId = createdWidgets[0].Id,
+            NavigationStyle = WidgetGroupNavigationStyles.Tabs
+        };
+        settings.WidgetGroups.Add(group);
+        return group;
+    }
+
     private static DesktopOrganizationRecoveryJournal BuildJournal(DesktopOrganizationPlan plan)
     {
         return new DesktopOrganizationRecoveryJournal
@@ -475,6 +510,8 @@ public sealed class DesktopOrganizationTransaction
             DesktopPath = plan.DesktopPath,
             StorageRootPath = plan.StorageRootPath,
             ExcludedItems = plan.ExcludedItems.ToList(),
+            CreateAsGroup = plan.CreateAsGroup,
+            GroupName = plan.GroupName,
             Targets = plan.Targets
                 .Where(target => completedPathsByTarget.ContainsKey(target.TargetWidgetId))
                 .Select(target => target.CloneWith(

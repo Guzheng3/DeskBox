@@ -198,6 +198,15 @@ public sealed class DesktopOrganizationPlan
 
     public List<DesktopOrganizationTargetPlan> Targets { get; init; } = [];
 
+    /// <summary>
+    /// Group mode: all widget-creating targets become members of a single
+    /// tabbed widget group instead of standalone widgets.
+    /// </summary>
+    public bool CreateAsGroup { get; init; }
+
+    /// <summary>Display name of the widget group created in group mode.</summary>
+    public string GroupName { get; init; } = string.Empty;
+
     public List<DesktopOrganizationFileSnapshot> ExcludedItems { get; init; } = [];
 
     public int EligibleItemCount => Targets.Sum(target => target.Items.Count);
@@ -233,6 +242,9 @@ public sealed class DesktopOrganizationRecoveryJournal
     public List<DesktopOrganizationRecoveryItem> Items { get; set; } = [];
 
     public List<string> CreatedWidgetIds { get; set; } = [];
+
+    /// <summary>Widget group created by a group-mode transaction, if any.</summary>
+    public string CreatedGroupId { get; set; } = string.Empty;
 }
 
 public sealed class DesktopOrganizationRecoveryItem

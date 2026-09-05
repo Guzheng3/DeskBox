@@ -102,6 +102,111 @@ public sealed class DesktopOrganizationPlanner
         };
     }
 
+    /// <summary>
+    /// One-click group mode: unrouted non-program items become members of a
+    /// single tabbed widget group, one member per populated category. Programs
+    /// stay on the desktop and small categories are never merged away.
+    /// </summary>
+    public DesktopOrganizationPlan CreateGroupPlan(
+        DesktopOrganizationScanResult scan,
+        string storageRootPath,
+        IReadOnlyCollection<WidgetConfig> widgets,
+        IReadOnlyCollection<DesktopOrganizationRule> rules,
+        string groupDisplayName,
+        Func<string, string>? categoryDisplayNameResolver = null)
+    {
+        string normalizedRoot = Path.GetFullPath(storageRootPath);
+        categoryDisplayNameResolver ??= categoryId => categoryId;
+        var targets = new Dictionary<string, MutableTarget>(StringComparer.Ordinal);
+        var pendingByCategory = new Dictionary<string, List<DesktopOrganizationFileSnapshot>>(StringComparer.Ordinal);
+
+        foreach (DesktopOrganizationFileSnapshot item in scan.Items.Where(item => item.IsEligible))
+        {
+            DesktopOrganizationRule? rule = _ruleResolver.Resolve(item, rules, widgets);
+            WidgetConfig? widget = rule is null
+                ? null
+                : widgets.FirstOrDefault(candidate =>
+                    string.Equals(candidate.Id, rule.TargetWidgetId, StringComparison.Ordinal));
+
+            if (widget is not null && !string.IsNullOrWhiteSpace(widget.MappedFolderPath))
+            {
+                if (!targets.TryGetValue(widget.Id, out MutableTarget? existing))
+                {
+                    existing = new MutableTarget(
+                        widget.Id,
+                        item.CategoryId,
+                        widget.Id,
+                        widget.Name,
+                        Path.GetFullPath(widget.MappedFolderPath),
+                        createsWidget: false);
+                    targets.Add(widget.Id, existing);
+                }
+
+                existing.Items.Add(item);
+                continue;
+            }
+
+            if (string.Equals(
+                    item.CategoryId,
+                    DesktopOrganizationCategoryIds.Programs,
+                    StringComparison.Ordinal))
+            {
+                continue;
+            }
+
+            if (!pendingByCategory.TryGetValue(item.CategoryId, out var pending))
+            {
+                pending = [];
+                pendingByCategory.Add(item.CategoryId, pending);
+            }
+
+            pending.Add(item);
+        }
+
+        string groupName = SanitizeFolderName(groupDisplayName);
+        var reservedDirectories = widgets
+            .Where(widget => !string.IsNullOrWhiteSpace(widget.MappedFolderPath))
+            .Select(widget => Path.GetFullPath(widget.MappedFolderPath!))
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        foreach (string categoryId in DesktopOrganizationCategoryIds.DefaultOrder)
+        {
+            if (categoryId == DesktopOrganizationCategoryIds.Programs ||
+                !pendingByCategory.TryGetValue(categoryId, out var items) ||
+                items.Count == 0)
+            {
+                continue;
+            }
+
+            string displayName = categoryDisplayNameResolver(categoryId);
+            string directory = FileService.GetAvailablePath(
+                Path.Combine(normalizedRoot, groupName, SanitizeFolderName(displayName)),
+                reservedDirectories);
+            reservedDirectories.Add(directory);
+            var target = new MutableTarget(
+                $"group:{categoryId}",
+                categoryId,
+                Guid.NewGuid().ToString("N"),
+                displayName,
+                directory,
+                createsWidget: true);
+            target.Items.AddRange(items);
+            targets.Add(target.WidgetId, target);
+        }
+
+        return new DesktopOrganizationPlan
+        {
+            DesktopPath = scan.DesktopPath,
+            StorageRootPath = normalizedRoot,
+            Targets = targets.Values
+                .Select(target => target.ToPlan())
+                .ToList(),
+            ExcludedItems = scan.Items.Where(item => !item.IsEligible).ToList(),
+            CreateAsGroup = true,
+            GroupName = groupName
+        };
+    }
+
     private static void MergeSmallAndOverflowCategories(
         IDictionary<string, List<DesktopOrganizationFileSnapshot>> categories)
     {
