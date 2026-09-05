@@ -2203,6 +2203,7 @@
     "DesktopOrganization.Subtype.Text": "文本与 Markdown",
     "DesktopOrganization.Subtype.Audio": "音频",
     "DesktopOrganization.Subtype.Video": "视频",
+    "DesktopOrganization.Subtype.Image": "图片",
     "DesktopOrganization.Common.Back": "返回",
     "DesktopOrganization.Common.Add": "添加",
     "Onboarding.Organization.Eyebrow": "可选 · 安全预览",

@@ -41,6 +41,7 @@ public static class DesktopOrganizationSubtypeIds
     public const string Text = "Text";
     public const string Audio = "Audio";
     public const string Video = "Video";
+    public const string Image = "Image";
 }
 
 /// <summary>

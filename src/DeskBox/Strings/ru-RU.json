@@ -2203,6 +2203,7 @@
   "DesktopOrganization.Subtype.Text": "Текст и уценка",
   "DesktopOrganization.Subtype.Audio": "Аудио",
   "DesktopOrganization.Subtype.Video": "Видео",
+  "DesktopOrganization.Subtype.Image": "Изображения",
   "DesktopOrganization.Common.Back": "Назад",
   "DesktopOrganization.Common.Add": "Добавить",
   "Onboarding.Organization.Eyebrow": "Необязательно · Безопасный предварительный просмотр",

@@ -2203,6 +2203,7 @@
   "DesktopOrganization.Subtype.Text": "Texte et démarque",
   "DesktopOrganization.Subtype.Audio": "Audio",
   "DesktopOrganization.Subtype.Video": "Vidéo",
+  "DesktopOrganization.Subtype.Image": "Images",
   "DesktopOrganization.Common.Back": "Retour",
   "DesktopOrganization.Common.Add": "Ajouter",
   "Onboarding.Organization.Eyebrow": "Facultatif · Aperçu sécurisé",

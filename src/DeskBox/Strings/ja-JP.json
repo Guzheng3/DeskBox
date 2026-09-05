@@ -2137,6 +2137,7 @@
     "DesktopOrganization.Subtype.Text": "テキストと Markdown",
     "DesktopOrganization.Subtype.Audio": "オーディオ",
     "DesktopOrganization.Subtype.Video": "ビデオ",
+    "DesktopOrganization.Subtype.Image": "画像",
     "DesktopOrganization.Common.Back": "戻る",
     "DesktopOrganization.Common.Add": "追加",
     "Onboarding.Organization.Eyebrow": "任意 · 安全なプレビュー",

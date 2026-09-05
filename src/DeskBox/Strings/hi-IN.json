@@ -2203,6 +2203,7 @@
   "DesktopOrganization.Subtype.Text": "टेक्स्ट और मार्कडाउन",
   "DesktopOrganization.Subtype.Audio": "ऑडियो",
   "DesktopOrganization.Subtype.Video": "वीडियो",
+  "DesktopOrganization.Subtype.Image": "छवियाँ",
   "DesktopOrganization.Common.Back": "वापस",
   "DesktopOrganization.Common.Add": "जोड़ें",
   "Onboarding.Organization.Eyebrow": "वैकल्पिक · सुरक्षित पूर्वावलोकन",

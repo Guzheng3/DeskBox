@@ -301,7 +301,8 @@ public sealed partial class DesktopOrganizationSettingsSection : UserControl
                      DesktopOrganizationSubtypeIds.PowerPoint,
                      DesktopOrganizationSubtypeIds.Text,
                      DesktopOrganizationSubtypeIds.Audio,
-                     DesktopOrganizationSubtypeIds.Video
+                     DesktopOrganizationSubtypeIds.Video,
+                     DesktopOrganizationSubtypeIds.Image
                  })
         {
             var checkBox = new CheckBox

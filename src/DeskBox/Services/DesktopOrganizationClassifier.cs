@@ -63,7 +63,7 @@ public sealed class DesktopOrganizationClassifier
 
         if (ImageExtensions.Contains(extension))
         {
-            return new(DesktopOrganizationCategoryIds.Media, null, extension);
+            return new(DesktopOrganizationCategoryIds.Media, DesktopOrganizationSubtypeIds.Image, extension);
         }
 
         if (AudioExtensions.Contains(extension))
@@ -104,6 +104,7 @@ public sealed class DesktopOrganizationClassifier
         {
             DesktopOrganizationSubtypeIds.Audio => AudioExtensions.OrderBy(value => value).ToArray(),
             DesktopOrganizationSubtypeIds.Video => VideoExtensions.OrderBy(value => value).ToArray(),
+            DesktopOrganizationSubtypeIds.Image => ImageExtensions.OrderBy(value => value).ToArray(),
             _ => DocumentSubtypeByExtension
                 .Where(pair => string.Equals(pair.Value, subtypeId, StringComparison.Ordinal))
                 .Select(pair => pair.Key)

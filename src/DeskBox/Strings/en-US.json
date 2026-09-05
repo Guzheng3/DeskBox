@@ -2203,6 +2203,7 @@
     "DesktopOrganization.Subtype.Text": "Text and Markdown",
     "DesktopOrganization.Subtype.Audio": "Audio",
     "DesktopOrganization.Subtype.Video": "Video",
+    "DesktopOrganization.Subtype.Image": "Images",
     "DesktopOrganization.Common.Back": "Back",
     "DesktopOrganization.Common.Add": "Add",
     "Onboarding.Organization.Eyebrow": "Optional · Safe preview",

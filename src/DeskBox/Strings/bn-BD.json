@@ -2203,6 +2203,7 @@
   "DesktopOrganization.Subtype.Text": "পাঠ্য এবং মার্কডাউন",
   "DesktopOrganization.Subtype.Audio": "অডিও",
   "DesktopOrganization.Subtype.Video": "ভিডিও",
+  "DesktopOrganization.Subtype.Image": "ছবি",
   "DesktopOrganization.Common.Back": "ফিরে",
   "DesktopOrganization.Common.Add": "যোগ করুন",
   "Onboarding.Organization.Eyebrow": "ঐচ্ছিক · নিরাপদ পূর্বরূপ",

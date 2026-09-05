@@ -10,7 +10,7 @@ public sealed class DesktopOrganizationTests : IDisposable
 
     [Theory]
     [InlineData("report.pdf", DesktopOrganizationCategoryIds.Documents, DesktopOrganizationSubtypeIds.Pdf)]
-    [InlineData("photo.webp", DesktopOrganizationCategoryIds.Media, null)]
+    [InlineData("photo.webp", DesktopOrganizationCategoryIds.Media, DesktopOrganizationSubtypeIds.Image)]
     [InlineData("movie.mp4", DesktopOrganizationCategoryIds.Media, DesktopOrganizationSubtypeIds.Video)]
     [InlineData("music.flac", DesktopOrganizationCategoryIds.Media, DesktopOrganizationSubtypeIds.Audio)]
     [InlineData("app.lnk", DesktopOrganizationCategoryIds.Programs, null)]
@@ -45,6 +45,14 @@ public sealed class DesktopOrganizationTests : IDisposable
             ".mp4",
             DesktopOrganizationClassifier.GetSubtypeExtensions(
                 DesktopOrganizationSubtypeIds.Video));
+        Assert.Contains(
+            ".webp",
+            DesktopOrganizationClassifier.GetSubtypeExtensions(
+                DesktopOrganizationSubtypeIds.Image));
+        Assert.Contains(
+            ".webp",
+            DesktopOrganizationClassifier.GetCategoryExtensions(
+                DesktopOrganizationCategoryIds.Media));
         Assert.Empty(
             DesktopOrganizationClassifier.GetCategoryExtensions(
                 DesktopOrganizationCategoryIds.Other));
