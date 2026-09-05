@@ -1,0 +1,125 @@
+# 云端编译 DeskBox 安装包
+# 手动触发（workflow_dispatch），在 GitHub 托管的 Windows runner 上执行：
+#   1. scripts\publish-aot-retail.ps1 产出 Full Native AOT 发布载荷（含 Rust 原生模块）
+#   2. Inno Setup 编译为标准离线安装包（与官方 Release 同名）
+#   3. 生成 .sha256 校验文件并上传为 Artifact 供下载
+# 公开仓库的 Actions 时长免费且不限量。
+
+name: Build Installer
+
+on:
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: '目标架构'
+        required: true
+        default: 'x64'
+        type: choice
+        options:
+          - x64
+          - ARM64
+          - both
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-installer-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build ${{ matrix.platform }} installer
+    runs-on: windows-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: ${{ github.event.inputs.platform == 'both' && fromJSON('["x64", "ARM64"]') || fromJSON(format('["{0}"]', github.event.inputs.platform)) }}
+
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: 1
+      DOTNET_NOLOGO: 1
+      RestoreLockedMode: true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: 安装固定的 .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.303'
+
+      - name: 验证 Rust 1.96.0 与 Inno Setup
+        shell: pwsh
+        run: |
+          # rustup 读取仓库 rust-toolchain.toml，自动安装固定版本 1.96.0 及双 msvc target
+          rustup show
+          $rustcDetails = rustc -vV | Out-String
+          if ($rustcDetails -notmatch 'rustc 1\.96\.0') {
+            throw "仓库固定的 Rust 1.96.0 工具链未生效。"
+          }
+          Write-Host $rustcDetails
+
+          $iscc = @(
+            (Get-Command ISCC.exe -ErrorAction SilentlyContinue).Source,
+            "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe",
+            "$env:ProgramFiles\Inno Setup 6\ISCC.exe"
+          ) | Where-Object { $_ -and (Test-Path -LiteralPath $_ -PathType Leaf) } |
+            Select-Object -First 1
+          if (-not $iscc) {
+            throw "Runner 镜像上找不到 ISCC.exe（Inno Setup 6）。"
+          }
+          $innoVersion = (Get-Item -LiteralPath $iscc).VersionInfo.FileVersion
+          Write-Host "Inno Setup compiler: $iscc ($innoVersion)"
+
+      - name: 发布 Full Native AOT 载荷
+        shell: pwsh
+        run: |
+          # 权威发布脚本：restore + AOT publish + Rust DLL + 安装清单 + 二进制审计
+          .\scripts\publish-aot-retail.ps1 -Platform ${{ matrix.platform }}
+
+      - name: 编译 Inno Setup 安装包
+        shell: pwsh
+        run: |
+          $rid = if ('${{ matrix.platform }}' -eq 'ARM64') { 'win-arm64' } else { 'win-x64' }
+          $iss = if ('${{ matrix.platform }}' -eq 'ARM64') { 'installer\DeskBox.arm64.iss' } else { 'installer\DeskBox.iss' }
+          $releaseDir = Join-Path $pwd ".artifacts\aot-retail\$rid\publish"
+          if (-not (Test-Path -LiteralPath (Join-Path $releaseDir 'DeskBox.exe') -PathType Leaf)) {
+            throw "发布载荷缺失: $releaseDir"
+          }
+
+          $iscc = @(
+            (Get-Command ISCC.exe -ErrorAction SilentlyContinue).Source,
+            "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe",
+            "$env:ProgramFiles\Inno Setup 6\ISCC.exe"
+          ) | Where-Object { $_ -and (Test-Path -LiteralPath $_ -PathType Leaf) } |
+            Select-Object -First 1
+          & $iscc "/DDeskBoxNativeAot=1" "/DDeskBoxBundledRuntime=1" "/DMyAppReleaseDir=$releaseDir" $iss
+          if ($LASTEXITCODE -ne 0) {
+            throw "Inno Setup 编译失败（exit $LASTEXITCODE）。"
+          }
+
+          Get-ChildItem -LiteralPath .\Output -Filter *.exe |
+            ForEach-Object { Write-Host "Installer: $($_.Name) ($([math]::Round($_.Length / 1MB, 1)) MB)" }
+
+      - name: 生成 sha256 校验文件
+        shell: pwsh
+        run: |
+          foreach ($exe in Get-ChildItem -LiteralPath .\Output -Filter *.exe) {
+            $hash = (Get-FileHash -LiteralPath $exe.FullName -Algorithm SHA256).Hash
+            "$hash  $($exe.Name)" | Set-Content -LiteralPath "$($exe.FullName).sha256" -Encoding ascii
+            Write-Host "$($exe.Name): $hash"
+          }
+
+      - name: 上传安装包
+        uses: actions/upload-artifact@v4
+        with:
+          name: DeskBox-Setup-${{ matrix.platform }}
+          if-no-files-found: error
+          retention-days: 14
+          path: |
+            Output/*.exe
+            Output/*.sha256
+            .artifacts/aot-retail/win-*/summary.json
