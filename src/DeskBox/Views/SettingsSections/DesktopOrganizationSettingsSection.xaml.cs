@@ -752,8 +752,7 @@ public sealed partial class DesktopOrganizationSettingsSection : UserControl
 
     private string BuildRuleSummary(DesktopOrganizationRule? rule)
     {
-        if (rule is null ||
-            (!rule.CategoryIds.Any() && !rule.SubtypeIds.Any() && !rule.Extensions.Any()))
+        if (rule is null || !HasAssignments(rule))
         {
             return T("DesktopOrganization.Rules.Unconfigured");
         }
@@ -763,12 +762,19 @@ public sealed partial class DesktopOrganizationSettingsSection : UserControl
             .Concat(rule.SubtypeIds.Select(subtype =>
                 T($"DesktopOrganization.Subtype.{subtype}")))
             .Concat(rule.Extensions)
-            .Take(4)
             .ToList();
+        if (rule.RecentDaysWindow is > 0)
+        {
+            values.Add(Format("DesktopOrganization.Rule.RecentDays", rule.RecentDaysWindow.Value));
+        }
+
+        string shown = values.Count > 4
+            ? string.Join("、", values.Take(4)) + $" +{values.Count - 4}"
+            : string.Join("、", values);
         string state = rule.IsEnabled
             ? T("DesktopOrganization.Rules.Enabled")
             : T("DesktopOrganization.Rules.Paused");
-        return $"{string.Join("、", values)} · {state}";
+        return $"{shown} · {state}";
     }
 
     private void BuildRuleTokens()
@@ -787,6 +793,13 @@ public sealed partial class DesktopOrganizationSettingsSection : UserControl
                 T($"DesktopOrganization.Subtype.{subtype}")))
             .Concat(_selectedRule.Extensions)
             .ToList();
+        if (_selectedRule.RecentDaysWindow is > 0)
+        {
+            values.Add(Format(
+                "DesktopOrganization.Rule.RecentDays",
+                _selectedRule.RecentDaysWindow.Value));
+        }
+
         bool hasAssignments = values.Count > 0;
         FileTypeExpander.Description = hasAssignments
             ? string.Join("、", values.Take(4)) + (values.Count > 4 ? $" +{values.Count - 4}" : string.Empty)
@@ -877,7 +890,8 @@ public sealed partial class DesktopOrganizationSettingsSection : UserControl
     private static bool HasAssignments(DesktopOrganizationRule rule) =>
         rule.CategoryIds.Count > 0 ||
         rule.SubtypeIds.Count > 0 ||
-        rule.Extensions.Count > 0;
+        rule.Extensions.Count > 0 ||
+        rule.RecentDaysWindow is > 0;
 
     private static bool IsEffectiveRule(
         DesktopOrganizationRule rule,

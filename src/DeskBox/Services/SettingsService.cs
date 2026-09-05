@@ -67,6 +67,7 @@ public sealed class SettingsService
     public const double DefaultWidgetOpacity = 0.80;
     public const double MinWidgetOpacity = 0.0;
     public const double MaxWidgetOpacity = 1.0;
+    public const int MaxRecentDaysWindow = 3650;
     public const double DefaultWidgetMaterialIntensity = 0.65;
     public const double MinWidgetMaterialIntensity = 0.0;
     public const double MaxWidgetMaterialIntensity = 1.0;
@@ -2487,6 +2488,9 @@ settings.FocusClickedWidgetOnRaise = false;
                     StringComparer.Ordinal);
                 rule.Extensions = NormalizeDesktopOrganizationExtensions(rule.Extensions);
                 rule.ExcludedExtensions = NormalizeDesktopOrganizationExtensions(rule.ExcludedExtensions);
+                rule.RecentDaysWindow = rule.RecentDaysWindow is <= 0 or > MaxRecentDaysWindow
+                    ? null
+                    : rule.RecentDaysWindow;
                 if (!validFileWidgetIds.Contains(rule.TargetWidgetId))
                 {
                     rule.IsEnabled = false;
@@ -2507,7 +2511,8 @@ settings.FocusClickedWidgetOnRaise = false;
             validFileWidgetIds.Contains(rule.TargetWidgetId) &&
             (rule.CategoryIds.Count > 0 ||
              rule.SubtypeIds.Count > 0 ||
-             rule.Extensions.Count > 0));
+             rule.Extensions.Count > 0 ||
+             rule.RecentDaysWindow is > 0));
         if (settings.DesktopAutoOrganizationEnabled &&
             !hasEffectiveDesktopOrganizationRule)
         {

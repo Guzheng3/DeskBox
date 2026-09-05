@@ -7,8 +7,10 @@ public sealed class DesktopOrganizationRuleResolver
     public DesktopOrganizationRule? Resolve(
         DesktopOrganizationFileSnapshot item,
         IEnumerable<DesktopOrganizationRule> rules,
-        IReadOnlyCollection<WidgetConfig> widgets)
+        IReadOnlyCollection<WidgetConfig> widgets,
+        DateTime? nowUtc = null)
     {
+        DateTime utcNow = nowUtc ?? DateTime.UtcNow;
         var validWidgetIds = widgets
             .Where(widget =>
                 widget.WidgetKind == WidgetKind.File &&
@@ -20,6 +22,7 @@ public sealed class DesktopOrganizationRuleResolver
         var candidates = rules
             .Where(rule => rule.IsEnabled && validWidgetIds.Contains(rule.TargetWidgetId))
             .Where(rule => !NormalizeExtensions(rule.ExcludedExtensions).Contains(item.Extension))
+            .Where(rule => IsWithinRecentWindow(item, rule, utcNow))
             .Select(rule => new
             {
                 Rule = rule,
@@ -103,7 +106,35 @@ public sealed class DesktopOrganizationRuleResolver
             return 2;
         }
 
-        return rule.CategoryIds.Contains(item.CategoryId, StringComparer.Ordinal) ? 1 : 0;
+        if (rule.CategoryIds.Contains(item.CategoryId, StringComparer.Ordinal))
+        {
+            return 1;
+        }
+
+        // A date-only rule (no type constraints, just a recency window) matches
+        // any file within the window at the same rank as a category rule.
+        if (rule.RecentDaysWindow is > 0 &&
+            rule.Extensions.Count == 0 &&
+            rule.SubtypeIds.Count == 0 &&
+            rule.CategoryIds.Count == 0)
+        {
+            return 1;
+        }
+
+        return 0;
+    }
+
+    private static bool IsWithinRecentWindow(
+        DesktopOrganizationFileSnapshot item,
+        DesktopOrganizationRule rule,
+        DateTime utcNow)
+    {
+        if (rule.RecentDaysWindow is not > 0)
+        {
+            return true;
+        }
+
+        return item.LastWriteTimeUtc >= utcNow.AddDays(-rule.RecentDaysWindow.Value);
     }
 
     private static HashSet<string> NormalizeExtensions(IEnumerable<string> extensions) =>

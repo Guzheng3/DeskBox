@@ -50,6 +50,12 @@ public sealed class DesktopOrganizationRule
     public List<string> Extensions { get; set; } = [];
 
     public List<string> ExcludedExtensions { get; set; } = [];
+
+    /// <summary>
+    /// Optional date constraint: only items whose LastWriteTimeUtc falls within
+    /// the last N days are matched by this rule. Null means unconstrained.
+    /// </summary>
+    public int? RecentDaysWindow { get; set; }
 }
 
 public enum DesktopOrganizationExclusionReason

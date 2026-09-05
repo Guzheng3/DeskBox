@@ -352,6 +352,12 @@ public sealed partial class ContentWidgetWindow
                     _config,
                     App.Current.LocalizationService,
                     SetFileWidgetFolderOpenBehaviorOverride));
+
+            if (!_config.IsDisabled &&
+                !string.IsNullOrWhiteSpace(_config.MappedFolderPath))
+            {
+                flyout.Items.Add(CreateWidgetRuleMenuItem());
+            }
         }
 
         WidgetGroupMenuBuilder.Append(

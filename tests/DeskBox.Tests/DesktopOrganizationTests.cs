@@ -202,6 +202,159 @@ public sealed class DesktopOrganizationTests : IDisposable
     }
 
     [Fact]
+    public void Resolver_DateWindowConstraintLetsFallbackRuleTakeOver()
+    {
+        var strictWidget = CreateWidget("strict", Path.Combine(_root, "strict"));
+        var fallbackWidget = CreateWidget("fallback", Path.Combine(_root, "fallback"));
+        var rules = new[]
+        {
+            new DesktopOrganizationRule
+            {
+                TargetWidgetId = strictWidget.Id,
+                Extensions = [".pdf"],
+                RecentDaysWindow = 7
+            },
+            new DesktopOrganizationRule
+            {
+                TargetWidgetId = fallbackWidget.Id,
+                CategoryIds = [DesktopOrganizationCategoryIds.Documents]
+            }
+        };
+        var resolver = new DesktopOrganizationRuleResolver();
+        DateTime now = DateTime.UtcNow;
+        var widgets = new[] { strictWidget, fallbackWidget };
+
+        DesktopOrganizationRule? recent = resolver.Resolve(
+            Snapshot(
+                "recent.pdf",
+                DesktopOrganizationCategoryIds.Documents,
+                DesktopOrganizationSubtypeIds.Pdf,
+                lastWriteTimeUtc: now.AddDays(-1)),
+            rules,
+            widgets,
+            now);
+        DesktopOrganizationRule? old = resolver.Resolve(
+            Snapshot(
+                "old.pdf",
+                DesktopOrganizationCategoryIds.Documents,
+                DesktopOrganizationSubtypeIds.Pdf,
+                lastWriteTimeUtc: now.AddDays(-30)),
+            rules,
+            widgets,
+            now);
+
+        Assert.Equal(strictWidget.Id, recent?.TargetWidgetId);
+        Assert.Equal(fallbackWidget.Id, old?.TargetWidgetId);
+    }
+
+    [Fact]
+    public void Resolver_DateOnlyRuleMatchesRecentFilesOfAnyType()
+    {
+        var widget = CreateWidget("inbox", Path.Combine(_root, "inbox"));
+        var rule = new DesktopOrganizationRule
+        {
+            TargetWidgetId = widget.Id,
+            RecentDaysWindow = 3
+        };
+        var resolver = new DesktopOrganizationRuleResolver();
+        DateTime now = DateTime.UtcNow;
+
+        DesktopOrganizationRule? recent = resolver.Resolve(
+            Snapshot(
+                "note.zzz",
+                DesktopOrganizationCategoryIds.Other,
+                null,
+                lastWriteTimeUtc: now.AddHours(-12)),
+            [rule],
+            [widget],
+            now);
+        DesktopOrganizationRule? old = resolver.Resolve(
+            Snapshot(
+                "note.zzz",
+                DesktopOrganizationCategoryIds.Other,
+                null,
+                lastWriteTimeUtc: now.AddDays(-10)),
+            [rule],
+            [widget],
+            now);
+
+        Assert.Same(rule, recent);
+        Assert.Null(old);
+    }
+
+    [Fact]
+    public void Resolver_UnconstrainedRuleStillMatchesOldFiles()
+    {
+        var widget = CreateWidget("docs", Path.Combine(_root, "docs"));
+        var rule = new DesktopOrganizationRule
+        {
+            TargetWidgetId = widget.Id,
+            CategoryIds = [DesktopOrganizationCategoryIds.Documents]
+        };
+        var item = Snapshot(
+            "archive.pdf",
+            DesktopOrganizationCategoryIds.Documents,
+            DesktopOrganizationSubtypeIds.Pdf,
+            lastWriteTimeUtc: DateTime.UtcNow.AddDays(-365));
+
+        DesktopOrganizationRule? result = new DesktopOrganizationRuleResolver()
+            .Resolve(item, [rule], [widget]);
+
+        Assert.Same(rule, result);
+    }
+
+    [Fact]
+    public async Task Settings_NormalizesInvalidRecentDaysWindows()
+    {
+        Directory.CreateDirectory(_root);
+        string mappedFolder = Directory.CreateDirectory(
+            Path.Combine(_root, "normalize-target")).FullName;
+        var settings = new SettingsService(Path.Combine(_root, "normalize-settings"));
+        WidgetConfig widget = CreateWidget("Inbox", mappedFolder);
+        settings.Settings.Widgets.Add(widget);
+        var rule = new DesktopOrganizationRule
+        {
+            TargetWidgetId = widget.Id,
+            RecentDaysWindow = -5
+        };
+        settings.Settings.DesktopOrganizationRules.Add(rule);
+
+        await settings.SaveAsync();
+        Assert.Null(rule.RecentDaysWindow);
+
+        rule.RecentDaysWindow = 9999;
+        await settings.SaveAsync();
+        Assert.Null(rule.RecentDaysWindow);
+
+        rule.RecentDaysWindow = 30;
+        await settings.SaveAsync();
+        Assert.Equal(30, rule.RecentDaysWindow);
+    }
+
+    [Fact]
+    public async Task Settings_KeepsAutoOrganizationEnabledForDateOnlyRule()
+    {
+        Directory.CreateDirectory(_root);
+        string mappedFolder = Directory.CreateDirectory(
+            Path.Combine(_root, "date-target")).FullName;
+        var settings = new SettingsService(Path.Combine(_root, "date-settings"));
+        WidgetConfig widget = CreateWidget("Inbox", mappedFolder);
+        settings.Settings.Widgets.Add(widget);
+        settings.Settings.DesktopOrganizationRules.Add(new DesktopOrganizationRule
+        {
+            TargetWidgetId = widget.Id,
+            RecentDaysWindow = 7
+        });
+        settings.Settings.DesktopAutoOrganizationEnabled = true;
+        settings.Settings.DesktopAutoOrganizationBaselineUtc = DateTimeOffset.UtcNow;
+
+        await settings.SaveAsync();
+
+        Assert.True(settings.Settings.DesktopAutoOrganizationEnabled);
+        Assert.NotNull(settings.Settings.DesktopAutoOrganizationBaselineUtc);
+    }
+
+    [Fact]
     public void Resolver_PrefersExtensionOverSubtypeAndCategory()
     {
         var categoryWidget = CreateWidget("documents", Path.Combine(_root, "documents"));
