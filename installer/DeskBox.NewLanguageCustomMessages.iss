@@ -177,10 +177,10 @@ chinesetraditional.NeedsRestart=執行環境相依元件已安裝，但 Windows 
 chinesetraditional.DependencyVerificationFailed=安裝相依元件後仍找不到必要的執行環境。DeskBox 尚未安裝。請安裝穩定版 .NET 10 Runtime 和 Windows App Runtime 2.4，然後重新執行安裝程式。
 
 ; Desktop background context menu entry
-hindi.DeskBox.ShellOrganizeDesktop=डेस्कटॉप व्यवस्थित करें
-spanish.DeskBox.ShellOrganizeDesktop=Organizar el escritorio
-french.DeskBox.ShellOrganizeDesktop=Organiser le bureau
-arabic.DeskBox.ShellOrganizeDesktop=تنظيم سطح المكتب
-bengali.DeskBox.ShellOrganizeDesktop=ডেস্কটপ সাজান
-russian.DeskBox.ShellOrganizeDesktop=Упорядочить рабочий стол
-chinesetraditional.DeskBox.ShellOrganizeDesktop=整理桌面
+hindi.ShellOrganizeDesktop=डेस्कटॉप व्यवस्थित करें
+spanish.ShellOrganizeDesktop=Organizar el escritorio
+french.ShellOrganizeDesktop=Organiser le bureau
+arabic.ShellOrganizeDesktop=تنظيم سطح المكتب
+bengali.ShellOrganizeDesktop=ডেস্কটপ সাজান
+russian.ShellOrganizeDesktop=Упорядочить рабочий стол
+chinesetraditional.ShellOrganizeDesktop=整理桌面

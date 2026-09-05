@@ -228,11 +228,11 @@ brazilianportuguese.NeedsRestart=As dependências de runtime foram instaladas, m
 brazilianportuguese.DependencyVerificationFailed=O ambiente de execução necessário ainda não foi detectado após a instalação das dependências. O DeskBox ainda não foi instalado. Instale o .NET 10 Runtime estável e o Windows App Runtime 2.4 e execute o instalador novamente.
 
 ; Desktop background context menu entry
-chinesesimplified.DeskBox.ShellOrganizeDesktop=整理桌面
-english.DeskBox.ShellOrganizeDesktop=Organize desktop
-japanese.DeskBox.ShellOrganizeDesktop=デスクトップを整理
-german.DeskBox.ShellOrganizeDesktop=Desktop sortieren
-brazilianportuguese.DeskBox.ShellOrganizeDesktop=Organizar a área de trabalho
+chinesesimplified.ShellOrganizeDesktop=整理桌面
+english.ShellOrganizeDesktop=Organize desktop
+japanese.ShellOrganizeDesktop=デスクトップを整理
+german.ShellOrganizeDesktop=Desktop sortieren
+brazilianportuguese.ShellOrganizeDesktop=Organizar a área de trabalho
 
 #include "DeskBox.NewLanguageCustomMessages.iss"
 #include "DeskBox.UninstallCustomMessages.iss"
@@ -280,7 +280,7 @@ Root: HKA; Subkey: "Software\DeskBox\DirectInstall"; ValueType: string; ValueNam
 Root: HKA; Subkey: "Software\DeskBox\DirectInstall"; ValueType: string; ValueName: "InstallVersion"; ValueData: "{#MyAppVersion}"; Flags: uninsdeletevalue uninsdeletekeyifempty
 Root: HKA; Subkey: "Software\DeskBox\DirectInstall"; ValueType: string; ValueName: "InstallScope"; ValueData: "{code:GetInstallScopeName}"; Flags: uninsdeletevalue uninsdeletekeyifempty
 ; Desktop background context menu: one-click "organize desktop"
-Root: HKA; Subkey: "Software\Classes\Directory\Background\shell\DeskBoxOrganize"; ValueType: string; ValueName: "MUIVerb"; ValueData: "{cm:DeskBox.ShellOrganizeDesktop}"; Flags: uninsdeletekey
+Root: HKA; Subkey: "Software\Classes\Directory\Background\shell\DeskBoxOrganize"; ValueType: string; ValueName: "MUIVerb"; ValueData: "{cm:ShellOrganizeDesktop}"; Flags: uninsdeletekey
 Root: HKA; Subkey: "Software\Classes\Directory\Background\shell\DeskBoxOrganize"; ValueType: string; ValueName: "Icon"; ValueData: "{app}\DeskBox.exe"; Flags: uninsdeletekey
 Root: HKA; Subkey: "Software\Classes\Directory\Background\shell\DeskBoxOrganize\command"; ValueType: string; ValueName: ""; ValueData: """{app}\DeskBox.exe"" --organize-desktop"; Flags: uninsdeletekey
 
