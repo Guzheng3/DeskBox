@@ -28,6 +28,9 @@ public class OrganizationHistoryEntry
     /// <summary>All widget destinations participating in a desktop batch.</summary>
     public List<OrganizationHistoryTarget> Targets { get; set; } = [];
 
+    /// <summary>System icons hidden by a quick organization run, restored on undo.</summary>
+    public List<string> HiddenSystemIconClsids { get; set; } = [];
+
     [JsonIgnore]
     public bool IsFailed => !string.IsNullOrWhiteSpace(ErrorMessage);
 

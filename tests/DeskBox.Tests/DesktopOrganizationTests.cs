@@ -1139,6 +1139,51 @@ public sealed class DesktopOrganizationTests : IDisposable
         Assert.False(store.HasPendingJournal);
     }
 
+    [Fact]
+    public void SystemIconService_ComputesOnlyVisibleIconsToHide()
+    {
+        string recycleBin = DesktopSystemIconService.DesktopSystemIconClsids[0];
+        string thisPc = DesktopSystemIconService.DesktopSystemIconClsids[1];
+        var alreadyHidden = new HashSet<string>(StringComparer.Ordinal) { thisPc };
+
+        List<string> toHide = DesktopSystemIconService.ComputeClsidsToHide(
+            alreadyHidden.Contains);
+
+        Assert.Equal(
+            DesktopSystemIconService.DesktopSystemIconClsids.Where(clsid => clsid != thisPc),
+            toHide);
+        Assert.Contains(recycleBin, toHide);
+    }
+
+    [Fact]
+    public void SystemIconService_ComputesOnlyStillHiddenIconsToRestore()
+    {
+        string recycleBin = DesktopSystemIconService.DesktopSystemIconClsids[0];
+        string thisPc = DesktopSystemIconService.DesktopSystemIconClsids[1];
+        var stillHidden = new HashSet<string>(StringComparer.Ordinal) { recycleBin };
+        string[] hiddenByOrganization = [recycleBin, thisPc];
+
+        List<string> toRestore = DesktopSystemIconService.ComputeClsidsToRestore(
+            hiddenByOrganization,
+            stillHidden.Contains);
+
+        Assert.Equal([recycleBin], toRestore);
+    }
+
+    [Fact]
+    public void SystemIconService_CoversRecycleBinAndThisPc()
+    {
+        Assert.Contains(
+            "{645FF040-5081-101B-9F08-00AA002F954E}",
+            DesktopSystemIconService.DesktopSystemIconClsids);
+        Assert.Contains(
+            "{20D04FE0-3AEA-1069-A2D8-08002B30309D}",
+            DesktopSystemIconService.DesktopSystemIconClsids);
+        Assert.Equal(
+            DesktopSystemIconService.DesktopSystemIconClsids.Distinct(),
+            DesktopSystemIconService.DesktopSystemIconClsids);
+    }
+
     private DesktopOrganizationFileSnapshot Snapshot(
         string name,
         string category,

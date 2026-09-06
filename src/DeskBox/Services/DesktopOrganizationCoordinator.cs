@@ -12,6 +12,7 @@ public sealed class DesktopOrganizationCoordinator
     private readonly DesktopOrganizationScanner _scanner;
     private readonly DesktopOrganizationPlanner _planner;
     private readonly DesktopOrganizationPlacementPlanner _placementPlanner = new();
+    private readonly DesktopSystemIconService _systemIconService = new();
     private readonly DesktopOrganizationTransaction _transaction;
 
     public DesktopOrganizationCoordinator(
@@ -315,6 +316,11 @@ public sealed class DesktopOrganizationCoordinator
         }
 
         await _organizerService.UndoAsync(historyId);
+        if (history.HiddenSystemIconClsids.Count > 0)
+        {
+            _systemIconService.RestoreDesktopSystemIcons(history.HiddenSystemIconClsids);
+        }
+
         foreach (OrganizationHistoryTarget target in history.Targets)
         {
             if (target.WasCreated)
