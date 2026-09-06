@@ -2093,6 +2093,7 @@
   "DesktopOrganization.OneClick.Action": "Scanner le bureau",
     "DesktopOrganization.Group.DefaultName": "Organisation du bureau",
     "DesktopOrganization.QuickOrganize.Completed": "{0} fichiers ont été rangés dans le groupe du bureau.",
+    "DesktopOrganization.QuickOrganize.Partial": "{0} fichiers ont été rangés ; {1} n'ont pas pu être déplacés.",
     "DesktopOrganization.QuickOrganize.NothingToOrganize": "Il n'y a rien à organiser sur le bureau.",
     "DesktopOrganization.QuickOrganize.Failed": "Échec de l'organisation du bureau. Veuillez réessayer.",
   "DesktopOrganization.Settings.StartAction": "Commencer le rangement",

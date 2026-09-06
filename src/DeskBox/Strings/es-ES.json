@@ -2093,6 +2093,7 @@
   "DesktopOrganization.OneClick.Action": "Escanear escritorio",
     "DesktopOrganization.Group.DefaultName": "Organización del escritorio",
     "DesktopOrganization.QuickOrganize.Completed": "Se han organizado {0} archivos en el grupo del escritorio.",
+    "DesktopOrganization.QuickOrganize.Partial": "Se han organizado {0} archivos; {1} no se han podido mover.",
     "DesktopOrganization.QuickOrganize.NothingToOrganize": "No hay nada que organizar en el escritorio.",
     "DesktopOrganization.QuickOrganize.Failed": "Error al organizar el escritorio. Inténtalo de nuevo.",
   "DesktopOrganization.Settings.StartAction": "Empezar a organizar",

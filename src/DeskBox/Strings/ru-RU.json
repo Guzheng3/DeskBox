@@ -2093,6 +2093,7 @@
   "DesktopOrganization.OneClick.Action": "Сканировать рабочий стол",
     "DesktopOrganization.Group.DefaultName": "Организация рабочего стола",
     "DesktopOrganization.QuickOrganize.Completed": "{0} файлов упорядочено в группе на рабочем столе.",
+    "DesktopOrganization.QuickOrganize.Partial": "{0} файлов упорядочено; {1} переместить не удалось.",
     "DesktopOrganization.QuickOrganize.NothingToOrganize": "На рабочем столе нет файлов для упорядочивания.",
     "DesktopOrganization.QuickOrganize.Failed": "Не удалось упорядочить рабочий стол. Повторите попытку.",
   "DesktopOrganization.Settings.StartAction": "Начать организацию",

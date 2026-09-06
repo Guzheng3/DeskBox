@@ -2362,6 +2362,16 @@ public partial class App : Application
                 return;
             }
 
+            if (result.RetainedItems.Count > 0)
+            {
+                ShowQuickOrganizationNotification(
+                    LocalizationService.Format(
+                        "DesktopOrganization.QuickOrganize.Partial",
+                        result.History.Items.Count,
+                        result.RetainedItems.Count));
+                return;
+            }
+
             ShowQuickOrganizationNotification(
                 LocalizationService.Format(
                     "DesktopOrganization.QuickOrganize.Completed",

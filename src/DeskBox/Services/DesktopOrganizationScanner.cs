@@ -75,6 +75,23 @@ public sealed class DesktopOrganizationScanner
             items.Add(CreateSnapshot(path, publicDesktopPath, includeSlowItems));
         }
 
+        // Interactive scans also cover the public desktop so its shortcuts
+        // can be organized; the auto organization snapshot keeps excluding
+        // them separately.
+        if (Directory.Exists(publicDesktopPath) &&
+            !string.Equals(publicDesktopPath, desktopPath, StringComparison.OrdinalIgnoreCase))
+        {
+            foreach (string path in Directory.EnumerateFileSystemEntries(publicDesktopPath, "*", SearchOption.TopDirectoryOnly))
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                items.Add(CreateSnapshot(
+                    path,
+                    publicDesktopPath,
+                    includeSlowItems,
+                    excludePublicDesktopItems: false));
+            }
+        }
+
         if (!includeSlowItems)
         {
             ApplyQuickBatchLimit(items);
@@ -118,7 +135,8 @@ public sealed class DesktopOrganizationScanner
     private DesktopOrganizationFileSnapshot CreateSnapshot(
         string path,
         string publicDesktopPath,
-        bool includeSlowItems)
+        bool includeSlowItems,
+        bool excludePublicDesktopItems = true)
     {
         string fullPath = Path.GetFullPath(path);
         string name = Path.GetFileName(fullPath);
@@ -148,9 +166,9 @@ public sealed class DesktopOrganizationScanner
                     : (attributes & FileAttributes.Offline) != 0
                         ? DesktopOrganizationExclusionReason.OfflinePlaceholder
                         : isTemporary
-                            ? DesktopOrganizationExclusionReason.TemporaryOrDownloading
-                            : IsUnderPath(fullPath, publicDesktopPath)
-                                ? DesktopOrganizationExclusionReason.PublicDesktopItem
+                                ? DesktopOrganizationExclusionReason.TemporaryOrDownloading
+                                : excludePublicDesktopItems && IsUnderPath(fullPath, publicDesktopPath)
+                                    ? DesktopOrganizationExclusionReason.PublicDesktopItem
                                 : isDirectory
                                     ? DesktopOrganizationExclusionReason.Folder
                                     : DesktopOrganizationExclusionReason.None;

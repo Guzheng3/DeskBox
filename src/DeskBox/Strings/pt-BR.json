@@ -2083,6 +2083,7 @@
     "DesktopOrganization.OneClick.Action": "Examinar área de trabalho",
     "DesktopOrganization.Group.DefaultName": "Organização da área de trabalho",
     "DesktopOrganization.QuickOrganize.Completed": "{0} arquivos foram organizados no grupo da área de trabalho.",
+    "DesktopOrganization.QuickOrganize.Partial": "{0} arquivos foram organizados; {1} não puderam ser movidos.",
     "DesktopOrganization.QuickOrganize.NothingToOrganize": "Não há nada para organizar na área de trabalho.",
     "DesktopOrganization.QuickOrganize.Failed": "Falha ao organizar a área de trabalho. Tente novamente.",
     "DesktopOrganization.Settings.StartAction": "Começar a organizar",

@@ -2093,6 +2093,7 @@
     "DesktopOrganization.OneClick.Action": "Scan desktop",
     "DesktopOrganization.Group.DefaultName": "Desktop Organization",
     "DesktopOrganization.QuickOrganize.Completed": "Organized {0} items into the desktop group.",
+    "DesktopOrganization.QuickOrganize.Partial": "Organized {0} items; {1} could not be moved.",
     "DesktopOrganization.QuickOrganize.NothingToOrganize": "There is nothing to organize on the desktop.",
     "DesktopOrganization.QuickOrganize.Failed": "Desktop organization failed. Please try again.",
     "DesktopOrganization.Settings.StartAction": "Start organizing",

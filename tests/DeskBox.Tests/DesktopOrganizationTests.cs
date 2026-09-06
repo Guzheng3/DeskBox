@@ -170,6 +170,64 @@ public sealed class DesktopOrganizationTests : IDisposable
     }
 
     [Fact]
+    public async Task Scanner_IncludesPublicDesktopItemsInInteractiveScanOnly()
+    {
+        string desktop = Directory.CreateDirectory(Path.Combine(_root, "user-desktop")).FullName;
+        string publicDesktop = Directory.CreateDirectory(Path.Combine(_root, "public-desktop")).FullName;
+        File.WriteAllText(Path.Combine(desktop, "report.pdf"), "pdf");
+        string shortcutPath = Path.Combine(publicDesktop, "app.lnk");
+        File.WriteAllText(shortcutPath, "lnk");
+        var scanner = new DesktopOrganizationScanner(
+            new DesktopOrganizationClassifier(),
+            () => desktop,
+            () => publicDesktop);
+
+        DesktopOrganizationScanResult result = await scanner.ScanAsync();
+
+        Assert.Equal(2, result.TotalCount);
+        Assert.Equal(2, result.EligibleCount);
+        DesktopOrganizationFileSnapshot shortcut = Assert.Single(
+            result.Items,
+            item => item.Name == "app.lnk");
+        Assert.Equal(DesktopOrganizationExclusionReason.None, shortcut.ExclusionReason);
+        Assert.Equal(DesktopOrganizationCategoryIds.Programs, shortcut.CategoryId);
+
+        DesktopOrganizationFileSnapshot autoSnapshot = scanner.CreateAutoOrganizationSnapshot(shortcutPath);
+        Assert.Equal(DesktopOrganizationExclusionReason.PublicDesktopItem, autoSnapshot.ExclusionReason);
+        Assert.False(autoSnapshot.IsEligible);
+    }
+
+    [Fact]
+    public async Task Planner_GroupModeMovesPublicDesktopShortcuts()
+    {
+        string desktop = Directory.CreateDirectory(Path.Combine(_root, "pub-desktop")).FullName;
+        string publicDesktop = Directory.CreateDirectory(Path.Combine(_root, "pub-public")).FullName;
+        File.WriteAllText(Path.Combine(desktop, "report.pdf"), "pdf");
+        File.WriteAllText(Path.Combine(publicDesktop, "tool.lnk"), "lnk");
+        var scanner = new DesktopOrganizationScanner(
+            new DesktopOrganizationClassifier(),
+            () => desktop,
+            () => publicDesktop);
+        DesktopOrganizationScanResult scan = await scanner.ScanAsync();
+
+        DesktopOrganizationPlan plan = new DesktopOrganizationPlanner(
+            new DesktopOrganizationRuleResolver()).CreateGroupPlan(
+            scan,
+            Path.Combine(_root, "pub-storage"),
+            [],
+            [],
+            "整理桌面");
+
+        DesktopOrganizationTargetPlan programs = Assert.Single(plan.Targets, target =>
+            target.CategoryId == DesktopOrganizationCategoryIds.Programs);
+        Assert.Equal(
+            ["tool.lnk"],
+            programs.Items.Select(item => item.Name).ToList());
+        Assert.All(programs.Items, item =>
+            Assert.StartsWith(publicDesktop, item.SourcePath, StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
     public async Task Scanner_LimitsQuickBatchItemCount()
     {
         Directory.CreateDirectory(_root);
@@ -469,11 +527,14 @@ public sealed class DesktopOrganizationTests : IDisposable
     }
 
     [Fact]
-    public void Planner_GroupModeKeepsProgramsAndMakesOneMemberPerCategory()
+    public void Planner_GroupModeMovesShortcutsAndKeepsProgramBinaries()
     {
         var items = new List<DesktopOrganizationFileSnapshot>
         {
             Snapshot("app.lnk", DesktopOrganizationCategoryIds.Programs, null),
+            Snapshot("suite.appref-ms", DesktopOrganizationCategoryIds.Programs, null),
+            Snapshot("tool.exe", DesktopOrganizationCategoryIds.Programs, null),
+            Snapshot("installer.msi", DesktopOrganizationCategoryIds.Programs, null),
             Snapshot("bundle.zip", DesktopOrganizationCategoryIds.Archives, null),
             Snapshot("photo.webp", DesktopOrganizationCategoryIds.Media, DesktopOrganizationSubtypeIds.Image),
             Snapshot("movie.mp4", DesktopOrganizationCategoryIds.Media, DesktopOrganizationSubtypeIds.Video),
@@ -499,11 +560,14 @@ public sealed class DesktopOrganizationTests : IDisposable
 
         Assert.True(plan.CreateAsGroup);
         Assert.Equal("整理桌面", plan.GroupName);
-        Assert.Equal(7, plan.EligibleItemCount);
-        Assert.DoesNotContain(plan.Targets, target =>
+        Assert.Equal(9, plan.EligibleItemCount);
+        DesktopOrganizationTargetPlan programs = Assert.Single(plan.Targets, target =>
             target.CategoryId == DesktopOrganizationCategoryIds.Programs);
+        Assert.Equal(
+            ["app.lnk", "suite.appref-ms"],
+            programs.Items.Select(item => item.Name).ToList());
         Assert.DoesNotContain(plan.Targets.SelectMany(target => target.Items), item =>
-            item.Name == "app.lnk");
+            item.Name is "tool.exe" or "installer.msi");
         DesktopOrganizationTargetPlan media = Assert.Single(plan.Targets, target =>
             target.CategoryId == DesktopOrganizationCategoryIds.Media);
         Assert.Equal(
@@ -517,7 +581,7 @@ public sealed class DesktopOrganizationTests : IDisposable
                 StringComparison.OrdinalIgnoreCase);
             Assert.Equal($"[{target.CategoryId}]", target.SuggestedDisplayName);
         });
-        Assert.Equal(5, plan.Targets.Count(target => target.CreatesWidget));
+        Assert.Equal(6, plan.Targets.Count(target => target.CreatesWidget));
     }
 
     [Fact]

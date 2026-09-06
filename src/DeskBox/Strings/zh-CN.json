@@ -2093,6 +2093,7 @@
     "DesktopOrganization.OneClick.Action": "扫描桌面",
     "DesktopOrganization.Group.DefaultName": "桌面整理",
     "DesktopOrganization.QuickOrganize.Completed": "已整理 {0} 个文件到桌面格子。",
+    "DesktopOrganization.QuickOrganize.Partial": "已整理 {0} 个文件，{1} 个文件无法移动。",
     "DesktopOrganization.QuickOrganize.NothingToOrganize": "桌面上没有需要整理的文件。",
     "DesktopOrganization.QuickOrganize.Failed": "整理桌面失败，请重试。",
     "DesktopOrganization.Settings.StartAction": "开始整理",

@@ -2083,6 +2083,7 @@
     "DesktopOrganization.OneClick.Action": "スキャン",
     "DesktopOrganization.Group.DefaultName": "デスクトップ整理",
     "DesktopOrganization.QuickOrganize.Completed": "{0} 個のファイルをデスクトップグループに整理しました。",
+    "DesktopOrganization.QuickOrganize.Partial": "{0} 個のファイルを整理しました。{1} 個のファイルは移動できませんでした。",
     "DesktopOrganization.QuickOrganize.NothingToOrganize": "整理が必要なファイルはデスクトップにありません。",
     "DesktopOrganization.QuickOrganize.Failed": "デスクトップの整理に失敗しました。もう一度お試しください。",
     "DesktopOrganization.Settings.StartAction": "整理を開始",

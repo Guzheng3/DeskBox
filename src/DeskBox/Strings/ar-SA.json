@@ -2093,6 +2093,7 @@
   "DesktopOrganization.OneClick.Action": "مسح سطح المكتب",
     "DesktopOrganization.Group.DefaultName": "تنظيم سطح المكتب",
     "DesktopOrganization.QuickOrganize.Completed": "تم تنظيم {0} ملفاً في مجموعة سطح المكتب.",
+    "DesktopOrganization.QuickOrganize.Partial": "تم تنظيم {0} ملفاً؛ تعذّر نقل {1}.",
     "DesktopOrganization.QuickOrganize.NothingToOrganize": "لا يوجد ما يمكن تنظيمه على سطح المكتب.",
     "DesktopOrganization.QuickOrganize.Failed": "فشل تنظيم سطح المكتب. حاول مرة أخرى.",
   "DesktopOrganization.Settings.StartAction": "بدء التنظيم",

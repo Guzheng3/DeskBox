@@ -84,6 +84,14 @@ public sealed class DesktopOrganizationClassifier
         return new(DesktopOrganizationCategoryIds.Other, null, extension);
     }
 
+    /// <summary>
+    /// Program shortcuts that quick organization moves into the Programs
+    /// member while the program binaries stay on the desktop.
+    /// </summary>
+    public static bool IsShortcutExtension(string? extension) =>
+        string.Equals(extension, ".lnk", StringComparison.OrdinalIgnoreCase) ||
+        string.Equals(extension, ".appref-ms", StringComparison.OrdinalIgnoreCase);
+
     public static IReadOnlyList<string> GetCategoryExtensions(string categoryId) =>
         categoryId switch
         {

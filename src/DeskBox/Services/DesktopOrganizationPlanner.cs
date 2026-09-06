@@ -103,9 +103,10 @@ public sealed class DesktopOrganizationPlanner
     }
 
     /// <summary>
-    /// One-click group mode: unrouted non-program items become members of a
-    /// single tabbed widget group, one member per populated category. Programs
-    /// stay on the desktop and small categories are never merged away.
+    /// One-click group mode: unrouted items become members of a single tabbed
+    /// widget group, one member per populated category. Program shortcuts join
+    /// the Programs member while program binaries stay on the desktop; small
+    /// categories are never merged away.
     /// </summary>
     public DesktopOrganizationPlan CreateGroupPlan(
         DesktopOrganizationScanResult scan,
@@ -146,10 +147,13 @@ public sealed class DesktopOrganizationPlanner
                 continue;
             }
 
+            // Program binaries stay on the desktop; shortcuts (.lnk,
+            // .appref-ms) join the group's Programs member.
             if (string.Equals(
                     item.CategoryId,
                     DesktopOrganizationCategoryIds.Programs,
-                    StringComparison.Ordinal))
+                    StringComparison.Ordinal) &&
+                !DesktopOrganizationClassifier.IsShortcutExtension(item.Extension))
             {
                 continue;
             }
@@ -171,8 +175,7 @@ public sealed class DesktopOrganizationPlanner
 
         foreach (string categoryId in DesktopOrganizationCategoryIds.DefaultOrder)
         {
-            if (categoryId == DesktopOrganizationCategoryIds.Programs ||
-                !pendingByCategory.TryGetValue(categoryId, out var items) ||
+            if (!pendingByCategory.TryGetValue(categoryId, out var items) ||
                 items.Count == 0)
             {
                 continue;

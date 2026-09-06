@@ -2093,6 +2093,7 @@
   "DesktopOrganization.OneClick.Action": "ডেস্কটপ স্ক্যান করুন",
     "DesktopOrganization.Group.DefaultName": "ডেস্কটপ সাজান",
     "DesktopOrganization.QuickOrganize.Completed": "{0}টি ফাইল ডেস্কটপ গ্রুপে সাজানো হয়েছে।",
+    "DesktopOrganization.QuickOrganize.Partial": "{0}টি ফাইল সাজানো হয়েছে; {1}টি সরানো যায়নি।",
     "DesktopOrganization.QuickOrganize.NothingToOrganize": "ডেস্কটপে সাজানোর মতো কিছু নেই।",
     "DesktopOrganization.QuickOrganize.Failed": "ডেস্কটপ সাজাতে ব্যর্থ হয়েছে। আবার চেষ্টা করুন।",
   "DesktopOrganization.Settings.StartAction": "গোছানো শুরু করুন",

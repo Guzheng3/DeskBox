@@ -2083,6 +2083,7 @@
     "DesktopOrganization.OneClick.Action": "Desktop scannen",
     "DesktopOrganization.Group.DefaultName": "Desktop-Ordnung",
     "DesktopOrganization.QuickOrganize.Completed": "{0} Dateien wurden in der Desktop-Gruppe abgelegt.",
+    "DesktopOrganization.QuickOrganize.Partial": "{0} Dateien wurden organisiert; {1} konnten nicht verschoben werden.",
     "DesktopOrganization.QuickOrganize.NothingToOrganize": "Auf dem Desktop gibt es nichts zu sortieren.",
     "DesktopOrganization.QuickOrganize.Failed": "Desktop-Ordnung fehlgeschlagen. Bitte erneut versuchen.",
     "DesktopOrganization.Settings.StartAction": "Organisation starten",
